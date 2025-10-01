@@ -38,8 +38,7 @@ if ($status == '1') {
     }
     // Waktu tiba diambil dari waktu server saat ini
     $query = mysqli_query($conn, "UPDATE tb_distribusi SET 
-                                    status_pengiriman = '2', 
-                                    lokasi_gps = '$gps',
+                                    status_pengiriman = '2',
                                     jam_tiba = NOW() 
                                   WHERE id_distribusi='$id'");
 } elseif ($status == '0') {

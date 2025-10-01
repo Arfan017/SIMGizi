@@ -376,7 +376,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body p-0">
-                                                    <iframe id="googleMapFrame"
+                                                    <iframe id="mapFrame"
                                                         src="https://maps.google.com/maps?q=-0.8898208520946149, 131.32141749340488&z=15&output=embed"
                                                         width="100%" height="400" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false"
                                                         tabindex="0"></iframe>
@@ -430,6 +430,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                 let jumlah = $(this).data("jumlah");
                 let lokasi = $(this).data("lokasi_gps");
                 let tujuan = $(this).data("tujuan");
+                const mapFrame = document.getElementById("mapFrame");
 
                 // Isi modal
                 $("#detailIdDistribusi").text(id_distribusi);
@@ -439,12 +440,18 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                 $("#detailLokasi").text(lokasi);
 
                 if (lokasi) {
-                    $("#detailLokasiLink").attr("href", "https://maps.google.com/maps?q=" + lokasi)
-                        .text(lokasi);
+                    mapFrame.src = `https://maps.google.com/maps?q=${lokasi}&z=15&output=embed`;
                 } else {
                     $("#detailLokasiLink").text("Tidak ada lokasi");
                 }
             });
+
+            function previewLokasi(gps) {
+                const mapFrame = document.getElementById("mapFrame");
+                if (gps) {
+
+                }
+            }
         </script>
 
 

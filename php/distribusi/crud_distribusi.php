@@ -1,8 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// BARU
 include '../config.php';
 header('Content-Type: application/json');
 
@@ -19,7 +15,6 @@ $lokasi = $_POST['lokasi'];
 mysqli_begin_transaction($conn);
 
 try {
-    // 1. Cek ketersediaan stok
     $stmt_cek = $conn->prepare("SELECT jumlah_sisa FROM tb_stok_harian WHERE tanggal = ? FOR UPDATE");
     $stmt_cek->bind_param("s", $tanggal);
     $stmt_cek->execute();
@@ -36,7 +31,6 @@ try {
         throw new Exception("Jumlah distribusi ($jumlah) melebihi sisa stok ($stok_sisa).");
     }
 
-    // 2. Kurangi stok
     $stmt_update = $conn->prepare("UPDATE tb_stok_harian SET jumlah_sisa = jumlah_sisa - ? WHERE tanggal = ?");
     $stmt_update->bind_param("is", $jumlah, $tanggal);
     if (!$stmt_update->execute()) {
@@ -44,7 +38,6 @@ try {
     }
     $stmt_update->close();
 
-    // 3. Simpan data distribusi (termasuk upload foto)
     $foto_name = '';
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
         $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
