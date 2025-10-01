@@ -8,8 +8,6 @@ if (!isset($_SESSION['role'])) {
 }
 include '../../../php/config.php';
 
-$id_petugas = $_SESSION['user_id'];
-
 $stok_sisa = 0;
 $tanggal_hari_ini = date("Y-m-d");
 $query_stok = mysqli_query($conn, "SELECT jumlah_sisa FROM tb_stok_harian WHERE tanggal = '$tanggal_hari_ini'");
@@ -204,80 +202,23 @@ $result = mysqli_query($conn, $query);
                             <div class="col-12 d-flex flex-column h-100">
                                 <div class="card overflow-hidden flex-grow-1 d-flex flex-column">
                                     <div class="card-head bg-warning card-img-top">
-                                        <h5 class="m-5 text-center text-white fw-bold ">Input Distribusi Makanan</h5>
+                                        <h5 class="m-5 text-center text-white fw-bold ">Input Jumlah Porsi Harian</h5>
                                         <!-- <hr class="mt-0"> -->
                                     </div>
                                     <div class="card-body">
-                                        <div class="alert alert-warning d-flex justify-content-between align-items-center" role="alert">
-                                            <h5 class="alert-heading mb-0">Sisa Porsi Hari Ini:</h5>
-                                            <span class="badge bg-warning fs-5"><?php echo number_format($stok_sisa); ?></span>
+                                        <div class="card-body">
+                                            <form id="formStokHarian" action="../../../php/distribusi/crud_stok.php" method="POST">
+                                                <div class="mb-3">
+                                                    <label for="tanggal_stok" class="form-label">Tanggal</label>
+                                                    <input type="date" class="form-control" id="tanggal_stok" name="tanggal_stok" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="jumlah_total" class="form-label">Jumlah Total Porsi</label>
+                                                    <input type="number" class="form-control" id="jumlah_total" name="jumlah_total" min="1" required placeholder="Contoh: 2000">
+                                                </div>
+                                                <button type="submit" class="btn btn-outline-warning w-100">Simpan Stok</button>
+                                            </form>
                                         </div>
-                                        <hr>
-                                        <form id="formDistribusi" enctype="multipart/form-data" method="POST" action="../../php/distribusi/crud_distribusi.php">
-                                            <div class="mb-3">
-                                                <input type="hidden" name="id_petugas_distribusi" value="<?php echo $id_petugas ?>">
-                                                <input type="hidden" name="nama_barang" value="Makanan">
-
-                                                <label for="sekolah" class="form-label mb-1">Sekolah Tujuan</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white"><i class="ri ri-school-line"></i></span>
-                                                    <select class="form-select" name="sekolah" id="sekolah" required>
-                                                        <option value="">Pilih Sekolah</option>
-                                                        <?php
-                                                        // pastikan query SELECT juga ambil kolom lokasi_gps
-                                                        while ($row = mysqli_fetch_assoc($result)) {
-                                                            echo "<option value='" . $row['id_sekolah'] . "' data-lokasi='" . $row['lokasi_gps'] . "'>" . $row['nama_sekolah'] . "</option>";
-                                                        }
-                                                        ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="jumlah" class="form-label mb-1">Jumlah Dikirim</label>
-                                                <div class="input-group ">
-                                                    <span class="input-group-text bg-white"><i class="ri ri-restaurant-2-line"></i></span>
-                                                    <input type="number" name="jumlah" class="form-control" id="jumlah" min="1" max="<?php echo $stok_sisa; ?>" required placeholder="Jumlah">
-                                                </div>
-                                            </div>
-
-                                            <div class="row g-2 mb-3">
-                                                <div class="col-6">
-                                                    <label for="tanggal" class="form-label mb-1">Tanggal</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text bg-white"><i class="ri ri-calendar-line"></i></span>
-                                                        <input type="date" name="tanggal" class="form-control" id="tanggal" required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6">
-                                                    <label for="jam" class="form-label mb-1">Jam</label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text bg-white"><i class="ri ri-time-line"></i></span>
-                                                        <input type="time" name="jam" class="form-control" id="jam" required>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="foto" class="form-label mb-1">Foto Makanan</label>
-                                                <input type="file" name="foto" class="form-control" id="foto" accept="image/*" required>
-                                                <div id="preview" class="mt-2"></div>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label class="form-label mb-1">Lokasi GPS</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white"><i class="ri ri-map-pin-line"></i></span>
-                                                    <input type="text" name="lokasi" class="form-control" id="lokasi" readonly placeholder="Klik tombol untuk ambil lokasi">
-                                                    <button type="button" class="btn btn-outline-primary" onclick="getLocation()">
-                                                        <i class="ri ri-crosshair-line"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <button type="submit" class="btn btn-outline-warning w-100 mt-2">Simpan Distribusi</button>
-                                        </form>
-
                                     </div>
                                 </div>
                             </div>
@@ -324,85 +265,26 @@ $result = mysqli_query($conn, $query);
     <script src="../../../assets/vendor/js/menu.js"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var sekolahSelect = document.getElementById("sekolah");
-            var lokasiInput = document.getElementById("lokasi");
-
-            sekolahSelect.addEventListener("change", function() {
-                var selectedOption = this.options[this.selectedIndex];
-                var lokasi = selectedOption.getAttribute("data-lokasi");
-
-                if (lokasi) {
-                    lokasiInput.value = lokasi; // set lokasi otomatis
-                } else {
-                    lokasiInput.value = ""; // kosongkan jika tidak ada
-                }
-            });
-        });
-
-        $('#formDistribusi').on('submit', function(e) {
+        $('#formStokHarian').on('submit', function(e) {
             e.preventDefault();
-            var formData = new FormData(this);
-
             $.ajax({
-                url: '../../../php/distribusi/crud_distribusi.php',
+                url: '../../../php/distribusi/crud_stok.php',
                 type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
+                data: $(this).serialize(),
                 dataType: 'json',
                 success: function(response) {
                     if (response.status === 'success') {
-                        const toast = new bootstrap.Toast(document.getElementById('distribusiToastSuccess'));
-                        toast.show();
-                        $('#formDistribusi')[0].reset();
-
-                        // Tampilkan data baru di panel
-                        $('#panelDistribusiBaru').html(`
-                            <div class="mb-3">
-                                <span class="fw-bold">Sekolah Tujuan:</span> ${response.data.sekolah}<br>
-                                <span class="fw-bold">Jumlah Dikirim:</span> ${response.data.jumlah}<br>
-                                <span class="fw-bold">Tanggal:</span> ${response.data.tanggal}<br>
-                                <span class="fw-bold">Jam:</span> ${response.data.jam}<br>
-                                <span class="fw-bold">Lokasi GPS:</span> ${response.data.lokasi}<br>
-                            </div>
-                            <button type="button" class="btn btn-success w-100" id="btnKirimDistribusi" data-id="${response.data.id}">
-                                <i class="ri-send-plane-2-line"></i> Kirim Distribusi
-                            </button>
-                        `);
-
-                        // Optional: setTimeout untuk reload jika ingin
-                        // setTimeout(function() { location.reload(); }, 1500);
+                        alert('Stok harian berhasil disimpan!');
+                        $('#formStokHarian')[0].reset();
                     } else {
-                        $('#distribusiErrorMsg').text(response.message);
-                        const toast = new bootstrap.Toast(document.getElementById('distribusiToastError'));
-                        toast.show();
+                        alert('Gagal: ' + response.message);
                     }
                 },
                 error: function() {
-                    var debugStr = '';
-                    formData.forEach(function(value, key) {
-                        debugStr += key + ': ' + value + '\n';
-                    });
-                    $('#distribusiErrorMsg').text('Gagal menyimpan data.\n' + debugStr);
-                    const toast = new bootstrap.Toast(document.getElementById('distribusiToastError'));
-                    toast.show();
+                    alert('Terjadi kesalahan. Gagal menghubungi server.');
                 }
             });
         });
-
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    $('#lokasi').val(position.coords.latitude + ',' + position.coords.longitude);
-                }, function() {
-                    alert('Gagal mendapatkan lokasi!');
-                });
-            } else {
-                alert('Browser tidak mendukung geolokasi!');
-            }
-        }
     </script>
 
     <!-- endbuild -->

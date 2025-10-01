@@ -1,10 +1,22 @@
 <!doctype html>
 
 <?php
+session_start();
+if (!isset($_SESSION['role'])) {
+    header('Location: ../../../index.php');
+    exit();
+}
 include '../../../php/config.php';
 
+$id_sekolah = $_SESSION['id_asal_sekolah'];
+
 // Query to get account data
-$query = "SELECT tb_distribusi.* , tb_users.nama FROM tb_distribusi JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users WHERE tb_distribusi.status_konfirmasi = '1' ORDER BY tb_distribusi.tanggal DESC";
+$query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
+            JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users 
+            JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
+            WHERE tb_distribusi.status_konfirmasi = '1' AND tb_distribusi.id_sekolah_tujuan = '$id_sekolah' 
+            ORDER BY tb_distribusi.tanggal DESC";
+
 $result = mysqli_query($conn, $query);
 
 ?>
@@ -123,15 +135,15 @@ $result = mysqli_query($conn, $query);
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h6 class="mb-0">John Doe</h6>
-                                                    <small class="text-body-secondary">Admin</small>
+                                                    <h6 class="mb-0"><?php echo $_SESSION['nama']; ?></h6>
+                                                    <small class="text-body-secondary"><?php echo $_SESSION['role']; ?></small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="d-grid px-4 pt-2 pb-1">
-                                            <a class="btn btn-danger d-flex" href="javascript:void(0);">
+                                            <a class="btn btn-danger d-flex" href="../../../php/logout.php">
                                                 <small class="align-middle">Logout</small>
                                                 <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                             </a>
@@ -158,31 +170,6 @@ $result = mysqli_query($conn, $query);
                             </nav>
                         </div>
 
-                        <!-- Navigasi horizontal -->
-                        <!-- <div class="d-flex align-items-center flex-nowrap gap-2 mb-4">
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownExport"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="ri-download-2-line me-1"></i> Export
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownExport">
-                                    <li>
-                                        <a class="dropdown-item" href="#" id="exportPdf">
-                                            <i class="ri-file-pdf-line text-danger me-2"></i>Export PDF
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" id="exportExcel">
-                                            <i class="ri-file-excel-2-line text-success me-2"></i>Export Excel
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <button class="btn btn-success" type="button">
-                                <i class="ri-printer-line me-1"></i> Cetak
-                            </button>
-                        </div> -->
-
                         <div class="row gy-6 h-100 flex-grow-1">
                             <!-- Data Tables -->
                             <div class="col-12 h-100">
@@ -194,9 +181,9 @@ $result = mysqli_query($conn, $query);
                                                 <button class="btn btn-outline-success w-100" type="button" onclick="cetakLaporan()">
                                                     <span class="icon-base ri ri-printer-line icon-16px me-1_5"></span>Cetak
                                                 </button>
-                                                <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="modal" data-bs-target="#ModalFilterData">
+                                                <!-- <button class="btn btn-outline-success w-100" type="button" data-bs-toggle="modal" data-bs-target="#ModalFilterData">
                                                     <span class="icon-base ri ri-filter-line icon-16px me-1_5"></span>Filter
-                                                </button>
+                                                </button> -->
                                             </div>
                                         </div>
                                         <hr class="mt-3 mb-3">
@@ -239,7 +226,7 @@ $result = mysqli_query($conn, $query);
                                                                             data-id_distribusi="<?= $row['nama'] ?>"
                                                                             data-tanggal="<?= $row['tanggal'] ?>"
                                                                             data-jumlah="<?= $row['jumlah'] ?>"
-                                                                            data-tujuan="<?= $row['tujuan'] ?>"
+                                                                            data-tujuan="<?= $row['sekolah_tujuan'] ?>"
                                                                             data-lokasi_gps="<?= $row['lokasi_gps'] ?>">Detail</button>
                                                                     </div>
                                                                 </td>

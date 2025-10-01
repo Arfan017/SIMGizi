@@ -1,9 +1,16 @@
 <!doctype html>
 <?php
+session_start();
+if (!isset($_SESSION['role'])) {
+    header('Location: ../../../index.php');
+    exit();
+}
 include '../../../php/config.php';
 
 // Query to get account data
-$query = "SELECT * FROM tb_distribusi WHERE status_konfirmasi = '1'";
+$query = "SELECT tb_distribusi.*, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
+            JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
+            WHERE status_konfirmasi = '1'";
 $result = mysqli_query($conn, $query);
 
 $q_sekolah = "SELECT * FROM tb_sekolah";
@@ -20,7 +27,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
 
-    <title>ADMIN SEKOLAH | SISTEM INFORMASI MONITORING PEMANTAUAN MAKANAN BERGIZI</title>
+    <title>ADMIN DISTRIBUSI | SISTEM INFORMASI MONITORING PEMANTAUAN MAKANAN BERGIZI</title>
 
     <meta name="description" content="" />
 
@@ -57,16 +64,14 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link">
+                    <a href="index.php" class="app-brand-link">
                         <i class="icon-base ri ri-inbox-archive-line icon-32px bg-warning"></i>
                         <span class="app-brand-text demo menu-text fw-semibold ms-2">ADMIN DISTRIBUSI</span>
                     </a>
                 </div>
 
                 <ul class="menu-inner py-1">
-                    <!-- Components -->
                     <li class="menu-header mt-7"><span class="menu-header-text">Menu</span></li>
-                    <!-- Cards -->
 
                     <li class="menu-item">
                         <a href="index.php" class="menu-link">
@@ -74,7 +79,12 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                             <div data-i18n="Basic">Dashboard</div>
                         </a>
                     </li>
-
+                    <li class="menu-item">
+                        <a href="input_stok_harian.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-inbox-archive-line"></i>
+                            <div data-i18n="Basic">Input Porsi harian</div>
+                        </a>
+                    </li>
                     <li class="menu-item">
                         <a href="input_distribusi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-git-repository-line"></i>
@@ -82,9 +92,15 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="riwayat_distribusi.php" class="menu-link">
+                        <a href="data_distribusi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-table-line"></i>
                             <div data-i18n="Basic">Data Distribusi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="riwayat_distribusi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-history-line"></i>
+                            <div data-i18n="Basic">Riwayat Distribusi</div>
                         </a>
                     </li>
                 </ul>
@@ -123,15 +139,15 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h6 class="mb-0">John Doe</h6>
-                                                    <small class="text-body-secondary">Admin</small>
+                                                    <h6 class="mb-0"><?php echo $_SESSION['nama']; ?></h6>
+                                                    <small class="text-body-secondary"><?php echo $_SESSION['role']; ?></small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="d-grid px-4 pt-2 pb-1">
-                                            <a class="btn btn-danger d-flex" href="javascript:void(0);">
+                                            <a class="btn btn-danger d-flex" href="../../../php/logout.php">
                                                 <small class="align-middle">Logout</small>
                                                 <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                             </a>
@@ -198,7 +214,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
 
                                                             <tr>
                                                                 <td><?php echo $row['id_distribusi']; ?></td>
-                                                                <td><?php echo $row['tujuan']; ?></td>
+                                                                <td><?php echo $row['sekolah_tujuan']; ?></td>
                                                                 <td><?php echo $row['jumlah']; ?></td>
                                                                 <td><?php echo $row['tanggal']; ?></td>
                                                                 <td><?php echo $row['jam']; ?></td>
@@ -221,6 +237,68 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
 
                                 </div>
                             </div>
+                            <!-- <div class="col-6 h-100">
+                                <div class="card overflow-hidden h-100">
+                                    <div class="card-header bg-transparent border-0 pt-4 pb-0 sticky-top bg-white">
+                                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
+                                            <h4 class="card-title text-warning mb-0 fw-bold">Data Distribusi</h4>
+                                            <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
+                                                <button class="btn btn-outline-warning w-100" type="button" onclick="cetakLaporan()">
+                                                    <span class="icon-base ri ri-printer-line icon-16px me-1_5"></span>Cetak
+                                                </button>
+                                                <button class="btn btn-outline-warning w-100 " type="button" data-bs-toggle="modal" data-bs-target="#ModalFilterData">
+                                                    <span class="icon-base ri ri-filter-line icon-16px me-1_5"></span>Filter
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <hr class="mt-3 mb-3">
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive overflow-auto" style="max-height: 500px;">
+                                            <table class="table table-sm table-bordered align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Sekolah Tujuan</th>
+                                                        <th>Jumlah</th>
+                                                        <th>Tanggal</th>
+                                                        <th>Jam</th>
+                                                        <th>Lokasi</th>
+                                                        <th>Foto</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php
+                                                    if (mysqli_num_rows($result) > 0) {
+                                                        while ($row = mysqli_fetch_assoc($result)) {
+                                                            // $status_badge = $row['status'] == '1' ? 'bg-label-success' : 'bg-label-danger';
+                                                    ?>
+
+                                                            <tr>
+                                                                <td><?php echo $row['id_distribusi']; ?></td>
+                                                                <td><?php echo $row['sekolah_tujuan']; ?></td>
+                                                                <td><?php echo $row['jumlah']; ?></td>
+                                                                <td><?php echo $row['tanggal']; ?></td>
+                                                                <td><?php echo $row['jam']; ?></td>
+                                                                <td><?php echo $row['lokasi_gps']; ?></td>
+                                                                <td>
+                                                                    <img src="../../../uploads/<?php echo $row['foto']; ?>" alt="Foto"
+                                                                        style="width:36px; height:36px; object-fit:cover;" class="rounded">
+                                                                </td>
+                                                            </tr>
+                                                    <?php
+                                                        }
+                                                    } else {
+                                                        echo "<tr><td colspan='7' class='text-center'>Data tidak ditemukan</td></tr>";
+                                                    }
+                                                    ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div> -->
                         </div>
                         <!-- Modal Filter Data -->
                         <div class="modal fade" id="ModalFilterData" tabindex="-1" aria-hidden="true">
@@ -256,7 +334,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                     <option value="">Pilih Sekolah</option>
                                                     <?php
                                                     while ($row = mysqli_fetch_assoc($result_sekolah)) {
-                                                        echo "<option value='" . $row['nama_sekolah'] . "'>" . $row['nama_sekolah'] . "</option>";
+                                                        echo "<option value='" . $row['id_sekolah'] . "'>" . $row['nama_sekolah'] . "</option>";
                                                     }
                                                     ?>
                                                 </select>
@@ -338,7 +416,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                             $.each(response, function(i, row) {
                                 tbody += `<tr>
                             <td>${row.id_distribusi}</td>
-                            <td>${row.tujuan}</td>
+                            <td>${row.sekolah_tujuan}</td>
                             <td>${row.jumlah}</td>
                             <td>${row.tanggal}</td>
                             <td>${row.jam}</td>

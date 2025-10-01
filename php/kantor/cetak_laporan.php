@@ -1,4 +1,5 @@
 <?php
+session_start();
 require '../../dompdf/vendor/autoload.php'; // include autoloader
 require '../config.php'; // koneksi database
 
@@ -9,6 +10,8 @@ $tanggal_akhir = $_GET['tanggal_akhir'] ?? '';
 $sekolah = $_GET['sekolah'] ?? '';
 $status_pengiriman = $_GET['status_pengiriman'] ?? '';
 
+$nama_sekolah= "";
+
 $where = "WHERE 1=1";
 if ($tanggal_mulai && $tanggal_akhir) {
     $where .= " AND tb_distribusi.tanggal BETWEEN '$tanggal_mulai' AND '$tanggal_akhir'";
@@ -18,16 +21,17 @@ if ($tanggal_mulai && $tanggal_akhir) {
     $where .= " AND tb_distribusi.tanggal <= '$tanggal_akhir'";
 }
 if ($sekolah) {
-    $where .= " AND tb_distribusi.tujuan = '$sekolah'";
+    $where .= " AND tb_distribusi.id_sekolah_tujuan = '$sekolah'";
 }
 if ($status_pengiriman !== '') {
     $where .= " AND tb_distribusi.status_pengiriman = '$status_pengiriman'";
+    $nama_sekolah = getNamaSekolah($conn, $sekolah);
 }
 
-$sql = "SELECT tb_distribusi.*, tb_users.nama 
-          FROM tb_distribusi 
+$sql = "SELECT tb_distribusi.*, tb_users.nama, tb_sekolah.nama_sekolah AS tujuan FROM tb_distribusi 
           JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users 
-          $where";
+          JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
+          $where ORDER BY tb_distribusi.tanggal ASC";
 
 // Ambil data distribusi
 $query = $conn->query($sql);
@@ -54,7 +58,7 @@ $html = '
     </tr>
     <tr>
         <td style="padding:3px 10px;">Sekolah Tujuan</td>
-        <td>:  ' . ($sekolah ?: 'semua sekolah') . '</td>
+        <td>:  ' . ($nama_sekolah ?: 'semua sekolah') . '</td>
     </tr>
 </table>
 
@@ -74,7 +78,6 @@ $html = '
 
 $no = 1;
 while ($row = $query->fetch_assoc()) {
-
     $status_badge = '';
     if ($row['status_pengiriman'] === '0') {
         $status = 'Belum Dikirim';
@@ -104,7 +107,7 @@ $html .= '
     <td style="text-align:right;">
       <p>Mengetahui,<br>Petugas Kantor</p>
       <br><br><br>
-      <p><u>' . $nama_petugas . '</u></p>
+      <p><u>' . $_SESSION['nama'] . '</u></p>
     </td>
   </tr>
 </table>
@@ -121,3 +124,14 @@ $dompdf->setPaper('A4', 'portrait'); // bisa "portrait" juga
 $dompdf->render();
 $dompdf->stream("laporan_distribusi.pdf", array("Attachment" => false));
 // Attachment=false supaya langsung tampil di browser
+
+
+function getNamaSekolah($conn, $id_sekolah) {
+    $query = "SELECT nama_sekolah FROM tb_sekolah WHERE id_sekolah = '$id_sekolah' LiMIT 1";
+    $result = mysqli_query($conn, $query);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $row = mysqli_fetch_assoc($result);
+        return $row['nama_sekolah'];
+    }
+    return '';
+}

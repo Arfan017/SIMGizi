@@ -1,23 +1,17 @@
 <!doctype html>
 
 <?php
-session_start();
-if (!isset($_SESSION['role'])) {
-    header('Location: ../../../index.php');
-    exit();
-}
 include '../../../php/config.php';
 
+// Query to get account data
 $query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
             JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users 
-            JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah ORDER BY tb_distribusi.tanggal ASC";
-
+            JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 
+            ORDER BY tb_distribusi.tanggal ASC";
 $result = mysqli_query($conn, $query);
-
 
 $q_sekolah = "SELECT * FROM tb_sekolah";
 $result_sekolah = mysqli_query($conn, $q_sekolah);
-
 ?>
 
 <html lang="en" class="layout-menu-fixed layout-compact" data-assets-path="../../../assets/"
@@ -100,13 +94,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                     </li>
 
                     <li class="menu-item">
-                        <a href="Tracking_pengiriman.php" class="menu-link">
-                            <i class="menu-icon icon-base ri ri-pin-distance-line"></i>
-                            <div data-i18n="Icons">Tracking Pengiriman</div>
-                        </a>
-                    </li>
-
-                    <li class="menu-item">
                         <a href="laporan_evaluasi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-list-check-3"></i>
                             <div data-i18n="Icons">Laporan & Evaluasi</div>
@@ -155,15 +142,15 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h6 class="mb-0"><?php echo $_SESSION['nama']; ?></h6>
-                                                    <small class="text-body-secondary"><?php echo $_SESSION['role']; ?></small>
+                                                    <h6 class="mb-0">John Doe</h6>
+                                                    <small class="text-body-secondary">Admin</small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="d-grid px-4 pt-2 pb-1">
-                                            <a class="btn btn-danger d-flex" href="../../../php/logout.php">
+                                            <a class="btn btn-danger d-flex" href="javascript:void(0);">
                                                 <small class="align-middle">Logout</small>
                                                 <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                             </a>
@@ -185,7 +172,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
                                     <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
-                                    <li class="breadcrumb-item active" aria-current="page">Rekapan Data</li>
+                                    <li class="breadcrumb-item active" aria-current="page">Monitoring</li>
                                 </ol>
                             </nav>
                         </div>
@@ -195,11 +182,19 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                 <div class="card overflow-hidden flex-grow-1 d-flex flex-column">
                                     <div class="card-header bg-transparent border-0 pt-4 pb-0 sticky-top bg-white">
                                         <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
-                                            <h4 class="card-title text-info mb-0 fw-bold">Rekapan Data</h4>
+
+                                            <h4 class="card-title text-info mb-0 fw-bold">Monitoring</h4>
                                             <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
-                                                <button class="btn btn-outline-info w-100" type="button" onclick="cetakLaporan()">
+                                                <!-- <button class="btn btn-outline-info w-50" type="button">
                                                     <span class="icon-base ri ri-printer-line icon-16px me-1_5"></span>Cetak
                                                 </button>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-white border-end-0">
+                                                        <i class="icon-base ri ri-search-line text-muted"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control border-start-0"
+                                                        placeholder="Cari monitoring...">
+                                                </div> -->
                                                 <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="modal" data-bs-target="#ModalFilterData">
                                                     <span class="icon-base ri ri-filter-line icon-16px me-1_5"></span>Filter
                                                 </button>
@@ -207,25 +202,28 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                         </div>
                                         <hr class="mt-3 mb-3">
                                     </div>
+
                                     <div class="table-responsive overflow-auto flex-grow-1" style="height: calc(570px - 90px);">
                                         <table class="table table-sm table-striped">
                                             <thead>
                                                 <tr>
                                                     <th class="text-truncate">Tanggal</th>
-                                                    <th class="text-truncate">Nama Sekolah</th>
+                                                    <th class="text-truncate">Sekolah Tujuan</th>
+                                                    <th class="text-truncate">Jumlah</th>
                                                     <th class="text-truncate">Nama Petugas</th>
                                                     <th class="text-truncate">Status</th>
+                                                    <th class="text-truncate">Aksi</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php
                                                 if (mysqli_num_rows($result) > 0) {
                                                     while ($row = mysqli_fetch_assoc($result)) {
-
                                                 ?>
                                                         <tr>
                                                             <td class="text-truncate"><?php echo $row['tanggal']; ?></td>
                                                             <td class="text-truncate"><?php echo $row['sekolah_tujuan']; ?></td>
+                                                            <td class="text-truncate"><?php echo $row['jumlah']; ?></td>
                                                             <td class="text-truncate">
                                                                 <span><?php echo $row['nama']; ?></span>
                                                             </td>
@@ -246,6 +244,19 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                                 ?>
                                                                 <span class="badge <?php echo $status_badge; ?> rounded-pill"><?php echo $status; ?></span>
                                                             </td>
+                                                            <td>
+                                                                <div class="btn-group">
+                                                                    <?php if ($row['status_pengiriman'] === '0'): ?>
+                                                                        <button type="button" class="btn btn-sm btn-outline-success btnKirim"
+                                                                            data-id="<?php echo $row['id_distribusi']; ?>">Kirim</button>
+                                                                    <?php elseif ($row['status_pengiriman'] === '1'): ?>
+                                                                        <button type="button" class="btn btn-sm btn-outline-danger btnBatalKirim"
+                                                                            data-id="<?php echo $row['id_distribusi']; ?>">Batal Kirim</button>
+                                                                    <?php else: ?>
+                                                                        <span class="text-muted">-</span>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </td>
                                                         </tr>
                                                 <?php
                                                     }
@@ -254,6 +265,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                             </tbody>
                                         </table>
                                     </div>
+
                                 </div>
                             </div>
                             <!--/ Data Tables -->
@@ -263,7 +275,12 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         <div class="modal fade" id="ModalFilterData" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
-                                    <!-- ...modal-header... -->
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel1">Filter Data</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+
+                                    </div>
                                     <div class="modal-body">
                                         <div class="row g-4">
                                             <div class="col mb-2">
@@ -280,7 +297,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                             </div>
                                         </div>
                                         <div class="row g-4">
-                                            <div class="col md-2">
+                                            <div class="col mb-2">
                                                 <div class="form-floating form-floating-outline">
                                                     <select class="form-select" id="filterSekolah">
                                                         <option value="">Pilih Sekolah</option>
@@ -294,12 +311,12 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                     <label for="filterSekolah">Sekolah</label>
                                                 </div>
                                             </div>
-                                            <div class="col md-2">
+                                            <div class="col mb-2">
                                                 <div class="form-floating form-floating-outline">
                                                     <select class="form-select" id="filterStatusPengiriman">
                                                         <option value="">Status Pengiriman</option>
-                                                        <option value="0">Belum Terkirim</option>
-                                                        <option value="1">Terkirim</option>
+                                                        <option value="0">Belum Dikirim</option>
+                                                        <option value="1">Dikirim</option>
                                                         <option value="2">Diterima</option>
                                                     </select>
                                                     <label for="filterStatusPengiriman">Status Pengiriman</label>
@@ -311,7 +328,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                         <button type="button" class="btn btn-outline-warning" data-bs-dismiss="modal">
                                             <span class="icon-base ri ri-close-line icon-16px me-1_5"></span>Tutup
                                         </button>
-                                        <button type="button" class="btn btn-outline-success" id="btnFilterData">
+                                        <button type="button" class="btn btn-outline-success" id="btnFilterMonitoring">
                                             <span class="icon-base ri ri-filter-line icon-16px me-1_5"></span>Filter
                                         </button>
                                     </div>
@@ -359,14 +376,14 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
 
     <script>
         $(document).ready(function() {
-            $('#btnFilterData').on('click', function() {
+            $('#btnFilterMonitoring').on('click', function() {
                 var tanggalMulai = $('#filterTanggalMulai').val();
                 var tanggalAkhir = $('#filterTanggalAkhir').val();
                 var sekolah = $('#filterSekolah').val();
                 var statusPengiriman = $('#filterStatusPengiriman').val();
 
                 $.ajax({
-                    url: '../../../php/kantor/filter_rekap_laporan.php',
+                    url: '../../../php/kantor/filter_monitoring.php',
                     type: 'POST',
                     data: {
                         tanggal_mulai: tanggalMulai,
@@ -379,18 +396,35 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         var tbody = '';
                         if (response.length > 0) {
                             $.each(response, function(i, row) {
-                                // Tentukan badge status
                                 let badge = '';
-                                if (row.status_pengiriman == '0') badge = '<span class="badge bg-label-warning rounded-pill">Belum Terkirim</span>';
-                                else if (row.status_pengiriman == '1') badge = '<span class="badge bg-label-info rounded-pill">Terkirim</span>';
-                                else if (row.status_pengiriman == '2') badge = '<span class="badge bg-label-success rounded-pill">Diterima</span>';
-                                else badge = '<span class="badge bg-label-secondary rounded-pill">-</span>';
+                                let statusText = '';
+                                if (row.status_pengiriman == '0') {
+                                    badge = 'bg-label-warning';
+                                    statusText = 'Belum Dikirim';
+                                } else if (row.status_pengiriman == '1') {
+                                    badge = 'bg-label-info';
+                                    statusText = 'Dikirim';
+                                } else if (row.status_pengiriman == '2') {
+                                    badge = 'bg-label-success';
+                                    statusText = 'Diterima';
+                                }
+
+                                // Kolom aksi
+                                let aksi = '';
+                                if (row.status_pengiriman == '0') {
+                                    aksi = `<button type="button" class="btn btn-sm btn-outline-success btnKirim" data-id="${row.id_distribusi}">Kirim</button>`;
+                                } else if (row.status_pengiriman == '1') {
+                                    aksi = `<button type="button" class="btn btn-sm btn-outline-danger btnBatalKirim" data-id="${row.id_distribusi}">Batal Kirim</button>`;
+                                } else {
+                                    aksi = `<span class="text-muted">-</span>`;
+                                }
 
                                 tbody += `<tr>
                             <td class="text-truncate">${row.tanggal}</td>
                             <td class="text-truncate">${row.sekolah_tujuan}</td>
                             <td class="text-truncate"><span>${row.nama}</span></td>
-                            <td>${badge}</td>
+                            <td><span class="badge ${badge} rounded-pill">${statusText}</span></td>
+                            <td>${aksi}</td>
                         </tr>`;
                             });
                         } else {
@@ -400,21 +434,57 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         $('#ModalFilterData').modal('hide');
                     },
                     error: function() {
-                        alert('Gagal memfilter data!');
+                        alert('Gagal memfilter data monitoring!');
                     }
                 });
             });
         });
 
-        function cetakLaporan() {
-            var tanggalMulai = $('#filterTanggalMulai').val();
-            var tanggalAkhir = $('#filterTanggalAkhir').val();
-            var sekolah = $('#filterSekolah').val();
-            var statusPengiriman = $('#filterStatusPengiriman').val();
+        $(document).on('click', '.btnKirim', function() {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '../../../php/kantor/update_status_pengiriman.php',
+                type: 'POST',
+                data: {
+                    id_distribusi: id,
+                    status: '1'
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(response.message || 'Gagal mengubah status!');
+                    }
+                },
+                error: function() {
+                    alert('Gagal mengubah status!');
+                }
+            });
+        });
 
-            let url = "../../../php/kantor/cetak_laporan.php?tanggal_mulai=" + tanggalMulai + "&tanggal_akhir=" + tanggalAkhir + "&sekolah=" + sekolah + "&status_pengiriman=" + statusPengiriman;
-            window.open(url, "_blank");
-        }
+        $(document).on('click', '.btnBatalKirim', function() {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '../../../php/kantor/update_status_pengiriman.php',
+                type: 'POST',
+                data: {
+                    id_distribusi: id,
+                    status: '0'
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(response.message || 'Gagal mengubah status!');
+                    }
+                },
+                error: function() {
+                    alert('Gagal mengubah status!');
+                }
+            });
+        });
     </script>
 
     <!-- endbuild -->

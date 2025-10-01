@@ -1,21 +1,33 @@
 <!doctype html>
 
 <?php
+session_start();
+if (!isset($_SESSION['role'])) {
+    header('Location: ../../../index.php');
+    exit();
+}
 include '../../../php/config.php';
 
 // Query to get evaluation report data
-$query = "SELECT * FROM tb_distribusi WHERE status_evaluasi = '0' AND status_konfirmasi = '1' ORDER BY tanggal DESC";
+$query = "SELECT tb_distribusi.*, tb_sekolah.nama_sekolah AS sekolah_tujuan, tb_konfirmasi_distribusi.gambar FROM tb_distribusi 
+          JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
+          JOIN tb_konfirmasi_distribusi ON tb_distribusi.id_distribusi = tb_konfirmasi_distribusi.id_distribusi
+          WHERE status_evaluasi = '0' AND status_konfirmasi = '1' ORDER BY tanggal DESC";
 $result = mysqli_query($conn, $query);
 
-$query_riwayat_evaluasi = "SELECT tb_evaluasi.*, tb_distribusi.tujuan, tb_distribusi.tanggal 
-                           FROM tb_evaluasi 
+$query_riwayat_evaluasi = "SELECT tb_evaluasi.*, tb_distribusi.id_sekolah_tujuan, tb_distribusi.tanggal, tb_sekolah.nama_sekolah AS sekolah_tujuan, tb_konfirmasi_distribusi.gambar FROM tb_evaluasi 
                            JOIN tb_distribusi ON tb_evaluasi.id_distribusi = tb_distribusi.id_distribusi 
+                           JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
+                           JOIN tb_konfirmasi_distribusi ON tb_evaluasi.id_distribusi = tb_konfirmasi_distribusi.id_distribusi 
                            ORDER BY tb_evaluasi.id_evaluasi DESC";
+
 $result_riwayat_evaluasi = mysqli_query($conn, $query_riwayat_evaluasi);
 
-$q_sekolah = "SELECT * FROM tb_sekolah";
-$result_sekolah = mysqli_query($conn, $q_sekolah);
+$q_sekolah1 = "SELECT * FROM tb_sekolah";
+$result_sekolah1 = mysqli_query($conn, $q_sekolah1);
 
+$q_sekolah2 = "SELECT * FROM tb_sekolah";
+$result_sekolah2 = mysqli_query($conn, $q_sekolah2);
 ?>
 
 <html
@@ -122,6 +134,13 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                     </li>
 
                     <li class="menu-item">
+                        <a href="Tracking_pengiriman.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-pin-distance-line"></i>
+                            <div data-i18n="Icons">Tracking Pengiriman</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
                         <a href="laporan_evaluasi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-list-check-3"></i>
                             <div data-i18n="Icons">Laporan & Evaluasi</div>
@@ -169,15 +188,15 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h6 class="mb-0">John Doe</h6>
-                                                    <small class="text-body-secondary">Admin</small>
+                                                    <h6 class="mb-0"><?php echo $_SESSION['nama']; ?></h6>
+                                                    <small class="text-body-secondary"><?php echo $_SESSION['role']; ?></small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="d-grid px-4 pt-2 pb-1">
-                                            <a class="btn btn-danger d-flex" href="javascript:void(0);">
+                                            <a class="btn btn-danger d-flex" href="../../../php/logout.php">
                                                 <small class="align-middle">Logout</small>
                                                 <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                             </a>
@@ -206,7 +225,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         <div class="row gy-6 flex-grow-1">
                             <!-- Data Tables -->
                             <div class="col-12">
-                                <div class="nav-align-top nav-tabs-shadow">
+                                <div class="nav-align-top nav-tabs-shadow h-100">
                                     <ul class="nav nav-tabs nav-fill " role="tablist">
                                         <li class="nav-item">
                                             <button
@@ -218,7 +237,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                 aria-controls="navs-justified-laporan-evaluasi"
                                                 aria-selected="true">
                                                 <span class="d-none d-sm-inline-flex align-items-center">
-                                                    <h5 class="mb-0 text-info">Riwayat Evaluasi</h5>
+                                                    <h5 class="mb-0 text-info">Evaluasi</h5>
                                                 </span>
                                             </button>
                                         </li>
@@ -237,34 +256,36 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                             </button>
                                         </li>
                                     </ul>
-                                    <div class="tab-content">
+                                    <div class="tab-content h-100">
                                         <div class="tab-pane fade show active" id="navs-justified-laporan-evaluasi" role="tabpanel">
                                             <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
                                                 <div class="form-floating form-floating-outline flex-grow-1">
-                                                    <select class="form-select" name="sekolah" id="filterSekolah" required>
+                                                    <select class="form-select" name="sekolah" id="filterSekolahEvaluasi" required>
                                                         <option value="">Pilih Sekolah</option>
                                                         <?php
-                                                        while ($row = mysqli_fetch_assoc($result_sekolah)) {
-                                                            echo "<option value='" . $row['nama_sekolah'] . "'>" . $row['nama_sekolah'] . "</option>";
+                                                        while ($row = mysqli_fetch_assoc($result_sekolah1)) {
+                                                            echo "<option value='" . $row['id_sekolah'] . "'>" . $row['nama_sekolah'] . "</option>";
                                                         }
                                                         ?>
                                                     </select>
                                                 </div>
                                                 <div class="form-floating form-floating-outline flex-grow-1">
-                                                    <input type="date" id="filterTanggalAwal" class="form-control" placeholder="Tanggal Awal" />
-                                                    <label for="filterTanggalAwal">Tanggal Awal</label>
+                                                    <input type="date" id="filterTanggalAwalEvaluasi" class="form-control" placeholder="Tanggal Awal" />
+                                                    <label for="filterTanggalAwalEvaluasi">Tanggal Awal</label>
                                                 </div>
                                                 <div class="form-floating form-floating-outline flex-grow-1">
-                                                    <input type="date" id="filterTanggalAkhir" class="form-control" placeholder="Tanggal Akhir" />
-                                                    <label for="filterTanggalAkhir">Tanggal Akhir</label>
+                                                    <input type="date" id="filterTanggalAkhirEvaluasi" class="form-control" placeholder="Tanggal Akhir" />
+                                                    <label for="filterTanggalAkhirEvaluasi">Tanggal Akhir</label>
                                                 </div>
                                                 <div class="">
-                                                    <button type="submit" class="btn btn-outline-success">Filter</button>
+                                                    <button type="button" class="btn btn-outline-info" id="btnFilterEvaluasi">
+                                                        <span class="icon-base ri ri-filter-line icon-16px me-1_5"></span>Filter
+                                                    </button>
                                                 </div>
                                             </div>
                                             <br>
                                             <div class="card-body p-0">
-                                                <div class="overflow-auto" style="height: calc(660px - 90px);">
+                                                <div class="overflow-auto">
                                                     <div class="p-0">
                                                         <?php
                                                         if (mysqli_num_rows($result) > 0) {
@@ -272,40 +293,49 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                                 // Display each evaluation report
                                                         ?>
                                                                 <div class="col-12">
-                                                                    <div class="card p-3 shadow-sm border">
-                                                                        <div class="d-flex align-items-center mb-2">
-                                                                            <img src="../../../assets/img/avatars/1.png" alt="Petugas" class="rounded"
-                                                                                style="width:48px; height:48px; object-fit:cover;">
-                                                                            <div class="ms-2">
-                                                                                <div class="fw-semibold"><?= $data["tujuan"] ?></div>
-                                                                                <small class="text-muted">tanggal: <?= $data["tanggal"] ?></small>
+                                                                    <div class="card p-3 shadow-sm bg-transparent border border-info">
+                                                                        <div class="row g-0">
+                                                                            <!-- Bagian Kiri: Foto -->
+                                                                            <div class="col-md-4 d-flex flex-column align-items-center justify-content-center border-end border-info">
+                                                                                <img src="../../../uploads/<?php echo $data["gambar"] ?>"
+                                                                                    alt="Foto Distribusi"
+                                                                                    class="rounded mb-2 preview-foto-btn"
+                                                                                    style="width:120px; height:120px; object-fit:cover; cursor:pointer;"
+                                                                                    data-bs-toggle="modal"
+                                                                                    data-bs-target="#modalPreviewFoto"
+                                                                                    data-foto="../../../uploads/<?php echo $data["gambar"] ?>">
+                                                                            </div>
+                                                                            <!-- Bagian Kanan: Data & Form Evaluasi -->
+                                                                            <div class="col-md-8 ps-4">
+                                                                                <div class="mb-2">
+                                                                                    <span class="fw-bold">Sekolah Tujuan:</span> <?= $data["sekolah_tujuan"] ?><br>
+                                                                                    <span class="fw-bold">Tanggal:</span> <?= $data["tanggal"] ?><br>
+                                                                                    <span class="fw-bold">ID Distribusi:</span> <?= $data["id_distribusi"] ?><br>
+                                                                                </div>
+                                                                                <form class="formEvaluasi" method="POST" action="../../../php/kantor/proses_evaluasi.php">
+                                                                                    <input type="hidden" name="id_distribusi" value="<?= $data["id_distribusi"] ?>">
+                                                                                    <div class="row g-2 align-items-center">
+                                                                                        <div class="col-md-4">
+                                                                                            <select class="form-select form-select-sm" name="status_distribusi">
+                                                                                                <option value="">Status Distribusi</option>
+                                                                                                <option value="1">Baik</option>
+                                                                                                <option value="2">Kurang Baik</option>
+                                                                                                <option value="3">Tidak Baik</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div class="col-md-5">
+                                                                                            <input type="text" class="form-control form-control-sm" name="catatan" placeholder="Catatan Evaluasi">
+                                                                                        </div>
+                                                                                        <div class="col-md-3">
+                                                                                            <button type="submit" class="btn btn-outline-success w-100">Evaluasi</button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </form>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="mb-2">
-                                                                        </div>
-                                                                        <form class="formEvaluasi" method="POST" action="../../../php/kantor/proses_evaluasi.php">
-                                                                            <div class="row g-2 align-items-center">
-                                                                                <input type="hidden" name="id_distribusi" value="<?= $data["id_distribusi"] ?>">
-                                                                                <div class="col-md-3">
-                                                                                    <select class="form-select form-select-sm" id="status" name="status_distribusi">
-                                                                                        <option value="">Status Distribusi</option>
-                                                                                        <option value="1">Baik</option>
-                                                                                        <option value="2">Kurang Baik</option>
-                                                                                        <option value="3">Tidak Baik</option>
-                                                                                    </select>
-                                                                                </div>
-                                                                                <div class="col-md-7">
-                                                                                    <input type="text" class="form-control form-control-sm" name="catatan" id="catatan" placeholder="Catatan Evaluasi">
-                                                                                </div>
-                                                                                <div class="col-md-2">
-                                                                                    <button type="submit" class="btn btn-outline-success w-100">Evaluasi</button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </form>
                                                                     </div>
                                                                     <hr>
                                                                 </div>
-
                                                         <?php
                                                             }
                                                         } else {
@@ -316,33 +346,41 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div class="tab-pane fade" id="navs-justified-riwayat-evaluasi" role="tabpanel">
                                             <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
                                                 <div class="form-floating form-floating-outline flex-grow-1">
-                                                    <select class="form-select" name="sekolah" id="filterSekolah" required>
+                                                    <select class="form-select" name="sekolah" id="filterSekolahRiwayat" required>
                                                         <option value="">Pilih Sekolah</option>
                                                         <?php
-                                                        while ($row = mysqli_fetch_assoc($result_sekolah)) {
-                                                            echo "<option value='" . $row['nama_sekolah'] . "'>" . $row['nama_sekolah'] . "</option>";
+                                                        while ($row = mysqli_fetch_assoc($result_sekolah2)) {
+                                                            echo "<option value='" . $row['id_sekolah'] . "'>" . $row['nama_sekolah'] . "</option>";
                                                         }
                                                         ?>
                                                     </select>
                                                 </div>
                                                 <div class="form-floating form-floating-outline flex-grow-1">
-                                                    <input type="date" id="filterTanggalAwal" class="form-control" placeholder="Tanggal Awal" />
-                                                    <label for="filterTanggalAwal">Tanggal Awal</label>
+                                                    <input type="date" id="filterTanggalAwalRiwayat" class="form-control" placeholder="Tanggal Awal" />
+                                                    <label for="filterTanggalAwalRiwayat">Tanggal Awal</label>
                                                 </div>
                                                 <div class="form-floating form-floating-outline flex-grow-1">
-                                                    <input type="date" id="filterTanggalAkhir" class="form-control" placeholder="Tanggal Akhir" />
-                                                    <label for="filterTanggalAkhir">Tanggal Akhir</label>
+                                                    <input type="date" id="filterTanggalAkhirRiwayat" class="form-control" placeholder="Tanggal Akhir" />
+                                                    <label for="filterTanggalAkhirRiwayat">Tanggal Akhir</label>
                                                 </div>
                                                 <div class="">
-                                                    <button type="submit" class="btn btn-outline-success">Filter</button>
+                                                    <button type="button" class="btn btn-outline-info" id="btnFilterRiwayat">
+                                                        <span class="icon-base ri ri-filter-line icon-16px me-1_5"></span>Filter
+                                                    </button>
+                                                </div>
+                                                <div class="">
+                                                    <button class="btn btn-outline-info w-100" type="button" onclick="cetakLaporan()">
+                                                        <span class="icon-base ri ri-printer-line icon-16px me-1_5"></span>Cetak
+                                                    </button>
                                                 </div>
                                             </div>
                                             <br>
                                             <div class="card-body p-0">
-                                                <div class="overflow-auto" style="height: calc(660px - 90px);">
+                                                <div class="overflow-auto">
                                                     <div class="p-3">
                                                         <?php if (mysqli_num_rows($result_riwayat_evaluasi) > 0): ?>
                                                             <div class="row g-3">
@@ -361,12 +399,12 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                                     ?>
                                                                     <div class="col-md-6 col-lg-4">
                                                                         <div class="card shadow-sm border-0 rounded-3 h-100">
-                                                                            <img src="../../../assets/img/avatars/1.png"
+                                                                            <img src="../../../uploads/<?php echo $data["gambar"] ?>"
                                                                                 class="card-img-top"
                                                                                 alt="Foto Distribusi"
                                                                                 style="object-fit:cover; height:200px;">
                                                                             <div class="card-body">
-                                                                                <h5 class="card-title text-primary mb-2"><?= $data["tujuan"] ?></h5>
+                                                                                <h5 class="card-title text-primary mb-2"><?= $data["sekolah_tujuan"] ?></h5>
                                                                                 <p class="card-text mb-1">
                                                                                     <strong>Tanggal:</strong> <?= $data["tanggal"] ?>
                                                                                 </p>
@@ -389,9 +427,22 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal Preview Foto (letakkan di luar loop, satu saja) -->
+                    <div class="modal fade" id="modalPreviewFoto" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Preview Foto Distribusi</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <img id="previewFotoImg" src="" alt="Foto Distribusi" class="img-fluid rounded">
                                 </div>
                             </div>
                         </div>
@@ -435,6 +486,11 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
     <script src="../../../assets/vendor/js/menu.js"></script>
 
     <script>
+        $(document).on('click', '.preview-foto-btn', function() {
+            var fotoSrc = $(this).data('foto');
+            $('#previewFotoImg').attr('src', fotoSrc);
+        });
+
         $(document).on('submit', '.formEvaluasi', function(e) {
             e.preventDefault();
             var form = $(this);
@@ -481,6 +537,152 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                 }
             });
         });
+
+        $('#btnFilterEvaluasi').on('click', function() {
+            var sekolah = $('#filterSekolahEvaluasi').val();
+            var tglAwal = $('#filterTanggalAwalEvaluasi').val();
+            var tglAkhir = $('#filterTanggalAkhirEvaluasi').val();
+
+            $.ajax({
+                url: '../../../php/kantor/filter_evaluasi.php',
+                type: 'POST',
+                data: {
+                    sekolah: sekolah,
+                    tanggal_awal: tglAwal,
+                    tanggal_akhir: tglAkhir
+                },
+                dataType: 'json',
+                success: function(response) {
+                    var html = '';
+                    if (response.length > 0) {
+                        $.each(response, function(i, data) {
+                            html += `<div class="col-12">
+                                        <div class="card p-3 shadow-sm border">
+                                            <div class="row g-0">
+                                                <div class="col-md-4 d-flex flex-column align-items-center justify-content-center border-end">
+                                                    <img src="../../../uploads/${data.gambar}"
+                                                        alt="Foto Distribusi"
+                                                        class="rounded mb-2 preview-foto-btn"
+                                                        style="width:120px; height:120px; object-fit:cover; cursor:pointer;"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalPreviewFoto"
+                                                        data-foto="../../../uploads/${data.gambar}">
+                                                </div>
+                                                <div class="col-md-8 ps-4">
+                                                    <div class="mb-2">
+                                                        <span class="fw-bold">Sekolah Tujuan:</span> ${data.sekolah_tujuan}<br>
+                                                        <span class="fw-bold">Tanggal:</span> ${data.tanggal}<br>
+                                                        <span class="fw-bold">ID Distribusi:</span> ${data.id_distribusi}<br>
+                                                    </div>
+                                                    <form class="formEvaluasi" method="POST" action="../../../php/kantor/proses_evaluasi.php">
+                                                        <input type="hidden" name="id_distribusi" value="${data.id_distribusi}">
+                                                        <div class="row g-2 align-items-center">
+                                                            <div class="col-md-4">
+                                                                <select class="form-select form-select-sm" name="status_distribusi">
+                                                                    <option value="">Status Distribusi</option>
+                                                                    <option value="1">Baik</option>
+                                                                    <option value="2">Kurang Baik</option>
+                                                                    <option value="3">Tidak Baik</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-5">
+                                                                <input type="text" class="form-control form-control-sm" name="catatan" placeholder="Catatan Evaluasi">
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <button type="submit" class="btn btn-outline-success w-100">Evaluasi</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                    </div>`;
+                        });
+                    } else {
+                        html = "<div class='text-muted'>Tidak ada laporan evaluasi.</div>";
+                    }
+
+                    // Pastikan selector tepat pada wrapper data
+                    $('#navs-justified-laporan-evaluasi .card-body .overflow-auto .p-0').html(html);
+                },
+                error: function() {
+                    alert('Gagal memfilter data evaluasi!');
+                }
+            });
+        });
+
+        $('#btnFilterRiwayat').on('click', function() {
+            var sekolah = $('#filterSekolahRiwayat').val();
+            var tglAwal = $('#filterTanggalAwalRiwayat').val();
+            var tglAkhir = $('#filterTanggalAkhirRiwayat').val();
+
+            $.ajax({
+                url: '../../../php/kantor/filter_riwayat_evaluasi.php',
+                type: 'POST',
+                data: {
+                    sekolah: sekolah,
+                    tanggal_awal: tglAwal,
+                    tanggal_akhir: tglAkhir
+                },
+                dataType: 'json',
+                success: function(response) {
+                    var html = '';
+                    if (response.length > 0) {
+                        html += '<div class="row g-3">';
+                        $.each(response, function(i, data) {
+                            let badge = "secondary";
+                            let statusText = "-";
+                            if (data.status_distribusi == 1) {
+                                badge = "success";
+                                statusText = "Baik";
+                            } else if (data.status_distribusi == 2) {
+                                badge = "warning";
+                                statusText = "Kurang Baik";
+                            } else if (data.status_distribusi == 3) {
+                                badge = "danger";
+                                statusText = "Tidak Baik";
+                            }
+                            html += `<div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm border-0 rounded-3 h-100">
+                            <img src="../../../uploads/${data.gambar}" class="card-img-top" alt="Foto Distribusi" style="object-fit:cover; height:200px;">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary mb-2">${data.sekolah_tujuan}</h5>
+                                <p class="card-text mb-1"><strong>Tanggal:</strong> ${data.tanggal}</p>
+                                <p class="card-text mb-1"><strong>Status Distribusi:</strong> <span class="badge bg-${badge}">${statusText}</span></p>
+                                <p class="card-text mb-1"><strong>Catatan Evaluasi:</strong><br>${data.catatan}</p>
+                            </div>
+                        </div>
+                    </div>`;
+                        });
+                        html += '</div>';
+                    } else {
+                        html = "<div class='text-muted'>Tidak ada laporan evaluasi.</div>";
+                    }
+                    $('#navs-justified-riwayat-evaluasi .card-body .p-3').html(html);
+                },
+                error: function() {
+                    alert('Gagal memfilter riwayat evaluasi!');
+                }
+            });
+        });
+
+
+
+        function cetakLaporan() {
+            // Ambil filter yang sedang dipilih
+            var sekolah = $('#filterSekolahRiwayat').val();
+            var tglAwal = $('#filterTanggalAwalRiwayat').val();
+            var tglAkhir = $('#filterTanggalAkhirRiwayat').val();
+
+            // Buat URL ke file cetak, kirim filter via GET
+            var url = '../../../php/kantor/cetak_riwayat_evaluasi.php?sekolah=' + encodeURIComponent(sekolah) +
+                '&tanggal_awal=' + encodeURIComponent(tglAwal) +
+                '&tanggal_akhir=' + encodeURIComponent(tglAkhir);
+
+            // Buka halaman cetak di tab baru
+            window.open(url, '_blank');
+        }
     </script>
 
     <!-- endbuild -->

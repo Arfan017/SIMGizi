@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     $password     = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role         = mysqli_real_escape_string($conn, $_POST['role']);
     $nama_lengkap = mysqli_real_escape_string($conn, $_POST['nama_lengkap']);
+    $asal_sekolah = mysqli_real_escape_string($conn, $_POST['id_asal_sekolah'] ?? "-");
+    $no_hp        = mysqli_real_escape_string($conn, $_POST['no_hp']);
     $status       = 'Aktif';
 
     // Cek apakah username sudah ada
@@ -22,8 +24,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     }
 
     // Insert data
-    $query = mysqli_query($conn, "INSERT INTO tb_users (username, password, role, nama, status) 
-                                  VALUES ('$username', '$password', '$role', '$nama_lengkap', '$status')");
+    $query = mysqli_query($conn, "INSERT INTO tb_users (username, password, role, nama, id_asal_sekolah, no_hp, status) 
+                                                VALUES ('$username', '$password', '$role', '$nama_lengkap', '$asal_sekolah', '$no_hp', '$status')");
     if ($query) {
         echo json_encode([
             "status" => "success",
@@ -66,6 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $role = mysqli_real_escape_string($conn, $_POST['role']);
     $nama_lengkap = mysqli_real_escape_string($conn, $_POST['nama_lengkap']);
+    $asal_sekolah = mysqli_real_escape_string($conn, $_POST['id_asal_sekolah'] ?? "-");
+    $no_hp = mysqli_real_escape_string($conn, $_POST['no_hp']);
     $status = mysqli_real_escape_string($conn, $_POST['status']);
     $password = $_POST['password'];
 
@@ -81,9 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
 
     if (!empty($password)) {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $query = mysqli_query($conn, "UPDATE tb_users SET username='$username', password='$password_hash', role='$role', nama='$nama_lengkap', status='$status' WHERE id_users=$id_users");
+        $query = mysqli_query($conn, "UPDATE tb_users SET username='$username', password='$password_hash', role='$role', nama='$nama_lengkap', id_asal_sekolah='$asal_sekolah', no_hp='$no_hp', status='$status' WHERE id_users=$id_users");
     } else {
-        $query = mysqli_query($conn, "UPDATE tb_users SET username='$username', role='$role', nama='$nama_lengkap', status='$status' WHERE id_users=$id_users");
+        $query = mysqli_query($conn, "UPDATE tb_users SET username='$username', role='$role', nama='$nama_lengkap', id_asal_sekolah='$asal_sekolah', no_hp='$no_hp', status='$status' WHERE id_users=$id_users");
     }
 
     if ($query) {

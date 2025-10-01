@@ -1,10 +1,17 @@
 <!doctype html>
 
 <?php
+session_start();
+if (!isset($_SESSION['role'])) {
+    header('Location: ../../../index.php');
+    exit();
+}
 include '../../../php/config.php';
 
 // Query to get account data
-$query = "SELECT tb_distribusi.* , tb_users.nama FROM tb_distribusi JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users ORDER BY tanggal DESC";
+$query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
+            JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 
+            JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users ORDER BY tanggal DESC";
 $result = mysqli_query($conn, $query);
 
 // Jumlah seluruh data distribusi
@@ -66,7 +73,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link">
+                    <a href="index.php" class="app-brand-link">
                         <i class="icon-base ri ri-inbox-archive-line icon-32px bg-warning"></i>
                         <span class="app-brand-text demo menu-text fw-semibold ms-2">ADMIN DISTRIBUSI</span>
                     </a>
@@ -81,7 +88,12 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                             <div data-i18n="Basic">Dashboard</div>
                         </a>
                     </li>
-
+                    <li class="menu-item">
+                        <a href="input_stok_harian.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-inbox-archive-line"></i>
+                            <div data-i18n="Basic">Input Porsi harian</div>
+                        </a>
+                    </li>
                     <li class="menu-item">
                         <a href="input_distribusi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-git-repository-line"></i>
@@ -89,9 +101,15 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="riwayat_distribusi.php" class="menu-link">
+                        <a href="data_distribusi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-table-line"></i>
                             <div data-i18n="Basic">Data Distribusi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="riwayat_distribusi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-history-line"></i>
+                            <div data-i18n="Basic">Riwayat Distribusi</div>
                         </a>
                     </li>
                 </ul>
@@ -130,15 +148,15 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h6 class="mb-0">John Doe</h6>
-                                                    <small class="text-body-secondary">Admin</small>
+                                                    <h6 class="mb-0"><?php echo $_SESSION['nama']; ?></h6>
+                                                    <small class="text-body-secondary"><?php echo $_SESSION['role']; ?></small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="d-grid px-4 pt-2 pb-1">
-                                            <a class="btn btn-danger d-flex" href="javascript:void(0);">
+                                            <a class="btn btn-danger d-flex" href="../../../php/logout.php">
                                                 <small class="align-middle">Logout</small>
                                                 <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                             </a>
@@ -159,25 +177,24 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                         <div class="mb-4">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
-                                    <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
                                 </ol>
                             </nav>
                         </div>
-                        <div class="row gy-6">
-
+                        <div class="row gy-3">
                             <div class="col-12">
                                 <div class="card h-100">
                                     <div class="card-header">
                                         <div class="d-flex align-items-center justify-content-between">
-                                            <h4 class="card-title text-warning mb-0 fw-bold">Dashboard
+                                            <h4 class="card-title text-warning mb-0 fw-bold">Dashboard Admin Distribusi
                                             </h4>
                                         </div>
                                     </div>
-                                    <div class="card-body pt-lg-10">
+                                    <div class="card-body">
                                         <div class="row g-6">
                                             <div class="col-md-4 col-6">
                                                 <div class="d-flex align-items-center">
-                                                    <div class="avatar">
+                                                    <div class="avatar avatar-md">
                                                         <div class="avatar-initial bg-primary rounded shadow-xs">
                                                             <i class="icon-base ri ri-pie-chart-2-line icon-24px"></i>
                                                         </div>
@@ -190,7 +207,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                             </div>
                                             <div class="col-md-4 col-6">
                                                 <div class="d-flex align-items-center">
-                                                    <div class="avatar">
+                                                    <div class="avatar avatar-md">
                                                         <div class="avatar-initial bg-success rounded shadow-xs">
                                                             <i class="icon-base ri ri-check-double-line icon-24px"></i>
                                                         </div>
@@ -203,7 +220,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                             </div>
                                             <div class="col-md-4 col-6">
                                                 <div class="d-flex align-items-center">
-                                                    <div class="avatar">
+                                                    <div class="avatar avatar-md">
                                                         <div class="avatar-initial bg-warning rounded shadow-xs">
                                                             <i class="icon-base ri ri-check-line icon-24px"></i>
                                                         </div>
@@ -220,203 +237,230 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                             </div>
 
                             <!-- Data Tables -->
-                            <div class="col-12">
+                            <div class="col-md">
                                 <div class="card overflow-hidden">
-                                    <h5 class="card-header text-warning mb-0 fw-bold">Data Distribusi</h5>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th class="text-truncate">Tanggal</th>
-                                                    <th class="text-truncate">Petugas Distribusi</th>
-                                                    <th class="text-truncate">Jumlah Distribusi</th>
-                                                    <th class="text-truncate">Status</th>
-                                                    <th class="text-truncate">Aksi</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                if (mysqli_num_rows($result) > 0) {
-                                                    while ($row = mysqli_fetch_assoc($result)) {
-                                                ?>
+                                    <!-- Fixed Header -->
+                                    <div class="card-header border-0 pt-4 pb-0 sticky-top bg-white">
+                                        <h5 class="card-title text-warning mb-0 fw-bold">Data Distribusi</h5>
+                                        <hr class="mt-3 mb-0">
+                                    </div>
+
+                                    <!-- Scrollable Body -->
+                                    <div class="card-body p-0">
+                                        <div class="overflow-auto" style="height: calc(480px - 90px);">
+                                            <div class="p-4">
+                                                <table class="table-responsive table table-sm">
+                                                    <thead>
                                                         <tr>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <div>
-                                                                        <h6 class="mb-0 text-truncate"><?php echo $row['tanggal']; ?></h6>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td class="text-truncate"><?php echo $row['nama']; ?></td>
-                                                            <td class="text-truncate">
-                                                                <span><?php echo $row['jumlah']; ?></span>
-                                                            </td>
-                                                            <td>
-                                                                <?php
-                                                                $status_badge = $row['status_konfirmasi'] == '1' ? 'bg-label-success' : 'bg-label-warning';
-                                                                $status_text = $row['status_konfirmasi'] == '1' ? 'Terkonfirmasi' : 'Belum Terkonfirmasi';
-                                                                ?>
-                                                                <span class="badge <?php echo $status_badge; ?> rounded-pill"><?php echo $status_text; ?></span>
-                                                            </td>
-                                                            <td>
-                                                                <div class="btn-group">
-                                                                    <button type="button"
-                                                                        class="btn btn-sm btn-outline-warning btnDetail"
-                                                                        data-bs-toggle="modal"
-                                                                        data-bs-target="#ModalDetail"
-                                                                        data-id_distribusi="<?= $row['nama'] ?>"
-                                                                        data-tanggal="<?= $row['tanggal'] ?>"
-                                                                        data-jumlah="<?= $row['jumlah'] ?>"
-                                                                        data-tujuan="<?= $row['tujuan'] ?>"
-                                                                        data-lokasi_gps="<?= $row['lokasi_gps'] ?>">Detail</button>
-                                                                </div>
-                                                            </td>
-                                                        <?php
-                                                    }
-                                                } else {
-                                                        ?>
-                                                        <tr>
-                                                            <td colspan="5" class="text-center">Tidak ada data distribusi</td>
+                                                            <th class="text-truncate">Tanggal</th>
+                                                            <th class="text-truncate">Sekolah Tujuan</th>
+                                                            <th class="text-truncate">Petugas Distribusi</th>
+                                                            <th class="text-truncate">Jumlah Distribusi</th>
+                                                            <th class="text-truncate">Status Pengiriman</th>
+                                                            <th class="text-truncate">Status konfirmasi</th>
+                                                            <th class="text-truncate">Aksi</th>
                                                         </tr>
-                                                    <?php
-                                                }
-                                                    ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <!--/ Data Tables -->
-                        </div>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        if (mysqli_num_rows($result) > 0) {
+                                                            while ($row = mysqli_fetch_assoc($result)) {
+                                                        ?>
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="d-flex align-items-center">
+                                                                            <div>
+                                                                                <h6 class="mb-0 text-truncate"><?php echo $row['tanggal']; ?></h6>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td class="text-truncate"><?php echo $row['sekolah_tujuan']; ?></td>
+                                                                    <td class="text-truncate"><?php echo $row['nama']; ?></td>
+                                                                    <td class="text-truncate">
+                                                                        <span><?php echo $row['jumlah']; ?></span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php
+                                                                        $status_pengiriman_badge = '';
+                                                                        $status_pengiriman_text = '';
 
-                        <!-- Modal Detail -->
-                        <div class="modal fade" id="ModalDetail" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <img src="../../../assets/img/avatars/1.png" alt="Petugas" class="rounded"
-                                            style="width:48px; height:48px; object-fit:cover;">
-                                        <div class="ms-2">
-                                            <div class="fw-semibold"><span id="detailTujuan"></span></div>
-                                            <small class="text-muted">Petugas: <span id="detailIdDistribusi"></span></small>
+                                                                        if ($row['status_pengiriman'] == '0') {
+                                                                            $status_pengiriman_badge = 'bg-label-warning';
+                                                                            $status_pengiriman_text = 'Belum Dikirim';
+                                                                        } elseif ($row['status_pengiriman'] == '1') {
+                                                                            $status_pengiriman_badge = 'bg-label-info';
+                                                                            $status_pengiriman_text = 'Dalam Perjalanan';
+                                                                        } elseif ($row['status_pengiriman'] == '2') {
+                                                                            $status_pengiriman_badge = 'bg-label-success';
+                                                                            $status_pengiriman_text = 'Diterima';
+                                                                        }
+                                                                        ?>
+                                                                        <span class="badge <?php echo $status_pengiriman_badge; ?> rounded-pill"><?php echo $status_pengiriman_text; ?></span>
+                                                                    <td>
+                                                                        <?php
+                                                                        $status_badge = $row['status_konfirmasi'] == '1' ? 'bg-label-success' : 'bg-label-warning';
+                                                                        $status_text = $row['status_konfirmasi'] == '1' ? 'Terkonfirmasi' : 'Belum Terkonfirmasi';
+                                                                        ?>
+                                                                        <span class="badge <?php echo $status_badge; ?> rounded-pill"><?php echo $status_text; ?></span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div class="btn-group">
+                                                                            <button type="button"
+                                                                                class="btn btn-sm btn-outline-warning btnDetail"
+                                                                                data-bs-toggle="modal"
+                                                                                data-bs-target="#ModalDetail"
+                                                                                data-id_distribusi="<?= $row['nama'] ?>"
+                                                                                data-tanggal="<?= $row['tanggal'] ?>"
+                                                                                data-jumlah="<?= $row['jumlah'] ?>"
+                                                                                data-tujuan="<?= $row['sekolah_tujuan'] ?>"
+                                                                                data-lokasi_gps="<?= $row['lokasi_gps'] ?>">Detail</button>
+                                                                        </div>
+                                                                    </td>
+                                                                <?php
+                                                            }
+                                                        } else {
+                                                                ?>
+                                                                <tr>
+                                                                    <td colspan="5" class="text-center">Tidak ada data distribusi</td>
+                                                                </tr>
+                                                            <?php
+                                                        }
+                                                            ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <!--/ Data Tables -->
+                                    </div>
+
+                                    <!-- Modal Detail -->
+                                    <div class="modal fade" id="ModalDetail" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <img src="../../../assets/img/avatars/1.png" alt="Petugas" class="rounded"
+                                                        style="width:48px; height:48px; object-fit:cover;">
+                                                    <div class="ms-2">
+                                                        <div class="fw-semibold"><span id="detailTujuan"></span></div>
+                                                        <small class="text-muted">Petugas: <span id="detailIdDistribusi"></span></small>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-2">
+                                                        <span class="me-2"><b>Dikirim:</b> <span id="detailJumlah"></span></span>
+                                                        <span class="me-2"><b>Tgl:</b> <span id="detailTanggal"></span></span>
+                                                        <span>
+                                                            <br>
+                                                            <b>Lokasi:</b>
+                                                            <a href="#" class="text-primary text-decoration-underline"><i class="ri-map-pin-2-fill">
+                                                                    <span id="detailLokasi"></span>
+                                                                </i></a>
+                                                            <button type="button" class="btn btn-outline-info btn-sm ms-2" data-bs-toggle="modal"
+                                                                data-bs-target="#modalMap">
+                                                                Preview Map
+                                                            </button>
+                                                        </span>
+                                                    </div>
+
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="modal-body">
-                                        <div class="mb-2">
-                                            <span class="me-2"><b>Dikirim:</b> <span id="detailJumlah"></span></span>
-                                            <span class="me-2"><b>Tgl:</b> <span id="detailTanggal"></span></span>
-                                            <span>
-                                                <br>
-                                                <b>Lokasi:</b>
-                                                <a href="#" class="text-primary text-decoration-underline"><i class="ri-map-pin-2-fill">
-                                                        <span id="detailLokasi"></span>
-                                                    </i></a>
-                                                <button type="button" class="btn btn-outline-info btn-sm ms-2" data-bs-toggle="modal"
-                                                    data-bs-target="#modalMap">
-                                                    Preview Map
-                                                </button>
-                                            </span>
+
+                                    <!-- Modal Google Map Preview -->
+                                    <div class="modal fade" id="modalMap" tabindex="-1" aria-labelledby="modalMapLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="modalMapLabel">Preview Lokasi</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body p-0">
+                                                    <iframe id="googleMapFrame"
+                                                        src="https://maps.google.com/maps?q=-0.8898208520946149, 131.32141749340488&z=15&output=embed"
+                                                        width="100%" height="400" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false"
+                                                        tabindex="0"></iframe>
+                                                </div>
+                                            </div>
                                         </div>
-
                                     </div>
                                 </div>
+                                <!-- / Content -->
+                                <div class="content-backdrop fade"></div>
                             </div>
+                            <!-- Content wrapper -->
                         </div>
+                    </div>
+                    <div class="layout-overlay layout-menu-toggle"></div>
+                </div>
 
-                        <!-- Modal Google Map Preview -->
-                        <div class="modal fade" id="modalMap" tabindex="-1" aria-labelledby="modalMapLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-lg modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="modalMapLabel">Preview Lokasi</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body p-0">
-                                        <iframe id="googleMapFrame"
-                                            src="https://maps.google.com/maps?q=-0.8898208520946149, 131.32141749340488&z=15&output=embed"
-                                            width="100%" height="400" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false"
-                                            tabindex="0"></iframe>
-                                    </div>
-                                </div>
+
+                <!-- Footer -->
+                <footer class="content-footer footer bg-footer-theme">
+                    <div class="container-xxl">
+                        <div
+                            class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+                            <div class="mb-2 mb-md-0">
+                                &#169;
+                                <script>
+                                    document.write(new Date().getFullYear());
+                                </script>, SISTEM INFORMASI MONITORING PEMANTAUAN MAKANAN BERGIZI
                             </div>
                         </div>
                     </div>
-                    <!-- / Content -->
-
-                    <!-- Footer -->
-                    <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl">
-                            <div
-                                class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
-                                <div class="mb-2 mb-md-0">
-                                    &#169;
-                                    <script>
-                                        document.write(new Date().getFullYear());
-                                    </script>, SISTEM INFORMASI MONITORING PEMANTAUAN MAKANAN BERGIZI
-                                </div>
-                            </div>
-                        </div>
-                    </footer>
-                    <!-- / Footer -->
-
-                    <div class="content-backdrop fade"></div>
-                </div>
-                <!-- Content wrapper -->
+                </footer>
+                <!-- / Footer -->
+                <!-- / Content -->
             </div>
-            <!-- / Layout page -->
+            <!-- / Layout wrapper -->
         </div>
 
-        <!-- Overlay -->
-        <div class="layout-overlay layout-menu-toggle"></div>
-    </div>
-    <!-- / Layout wrapper -->
+        <!-- Core JS -->
+        <script src="../../../assets/vendor/libs/jquery/jquery.js"></script>
+        <script src="../../../assets/vendor/libs/popper/popper.js"></script>
+        <script src="../../../assets/vendor/js/bootstrap.js"></script>
+        <script src="../../../assets/vendor/libs/node-waves/node-waves.js"></script>
+        <script src="../../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+        <script src="../../../assets/vendor/js/menu.js"></script>
 
-    <!-- Core JS -->
-    <script src="../../../assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../../../assets/vendor/libs/popper/popper.js"></script>
-    <script src="../../../assets/vendor/js/bootstrap.js"></script>
-    <script src="../../../assets/vendor/libs/node-waves/node-waves.js"></script>
-    <script src="../../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../../../assets/vendor/js/menu.js"></script>
+        <script>
+            $(document).on("click", ".btnDetail", function() {
+                let id_distribusi = $(this).data("id_distribusi");
+                let tanggal = $(this).data("tanggal");
+                let jumlah = $(this).data("jumlah");
+                let lokasi = $(this).data("lokasi_gps");
+                let tujuan = $(this).data("tujuan");
 
-    <script>
-        $(document).on("click", ".btnDetail", function() {
-            let id_distribusi = $(this).data("id_distribusi");
-            let tanggal = $(this).data("tanggal");
-            let jumlah = $(this).data("jumlah");
-            let lokasi = $(this).data("lokasi_gps");
-            let tujuan = $(this).data("tujuan");
+                // Isi modal
+                $("#detailIdDistribusi").text(id_distribusi);
+                $("#detailTanggal").text(tanggal);
+                $("#detailJumlah").text(jumlah);
+                $("#detailTujuan").text(tujuan);
+                $("#detailLokasi").text(lokasi);
 
-            // Isi modal
-            $("#detailIdDistribusi").text(id_distribusi);
-            $("#detailTanggal").text(tanggal);
-            $("#detailJumlah").text(jumlah);
-            $("#detailTujuan").text(tujuan);
-            $("#detailLokasi").text(lokasi);
-
-            if (lokasi) {
-                $("#detailLokasiLink").attr("href", "https://maps.google.com/maps?q=" + lokasi)
-                    .text(lokasi);
-            } else {
-                $("#detailLokasiLink").text("Tidak ada lokasi");
-            }
-        });
-    </script>
+                if (lokasi) {
+                    $("#detailLokasiLink").attr("href", "https://maps.google.com/maps?q=" + lokasi)
+                        .text(lokasi);
+                } else {
+                    $("#detailLokasiLink").text("Tidak ada lokasi");
+                }
+            });
+        </script>
 
 
-    <!-- endbuild -->
+        <!-- endbuild -->
 
-    <!-- Vendors JS -->
-    <script src="../../../assets/vendor/libs/apex-charts/apexcharts.js"></script>
+        <!-- Vendors JS -->
+        <script src="../../../assets/vendor/libs/apex-charts/apexcharts.js"></script>
 
-    <!-- Main JS -->
-    <script src="../../../assets/js/main.js"></script>
+        <!-- Main JS -->
+        <script src="../../../assets/js/main.js"></script>
 
-    <!-- Page JS -->
-    <script src="../../../assets/js/dashboards-analytics.js"></script>
+        <!-- Page JS -->
+        <script src="../../../assets/js/dashboards-analytics.js"></script>
 
-    <!-- Place this tag before closing body tag for github widget button. -->
-    <script async="async" defer="defer" src="https://buttons.github.io/buttons.js"></script>
+        <!-- Place this tag before closing body tag for github widget button. -->
+        <script async="async" defer="defer" src="https://buttons.github.io/buttons.js"></script>
 </body>
 
 </html>

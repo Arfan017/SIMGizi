@@ -2,8 +2,6 @@
 session_start();
 include 'config.php';
 
-// header('Content-Type: application/json');
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -16,6 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION["user_id"] = $data["id_users"];
             $_SESSION["role"] = $data["role"];
             $_SESSION["nama"] = $data["nama"];
+            $_SESSION["id_asal_sekolah"] = $data["id_asal_sekolah"];
 
             if ($data["role"] == 'admin_kantor') {
                 $redirect = "html/admin/kantor/index.php";

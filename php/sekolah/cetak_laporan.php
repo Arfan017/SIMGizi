@@ -1,4 +1,5 @@
 <?php
+session_start();
 require '../../dompdf/vendor/autoload.php'; // include autoloader
 require '../config.php'; // koneksi database
 
@@ -31,7 +32,7 @@ $sql = "SELECT tb_distribusi.*, tb_users.nama
 // Ambil data distribusi
 $query = $conn->query($sql);
 $petugas = $conn->query("SELECT * FROM tb_users WHERE id_users=2")->fetch_assoc();
-$nama_petugas = $petugas['nama'];
+// $nama_petugas = $petugas['nama'];
 
 
 // Buat HTML laporan
@@ -90,7 +91,7 @@ $html .= '
     <td style="text-align:right;">
       <p>Mengetahui,<br>Petugas Sekolah</p>
       <br><br><br>
-      <p><u>' . $nama_petugas . '</u></p>
+      <p><u>' . $_SESSION['nama'] . '</u></p>
     </td>
   </tr>
 </table>

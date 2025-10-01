@@ -1,22 +1,33 @@
 <!doctype html>
 
 <?php
+session_start();
+if (!isset($_SESSION['role'])) {
+  header('Location: ../../../index.php');
+  exit();
+}
 include '../../../php/config.php';
 
+$id_sekolah = $_SESSION['id_asal_sekolah'];
+
 // Query to get account data
-$query = "SELECT tb_distribusi.* , tb_users.nama FROM tb_distribusi JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users WHERE tb_distribusi.status_konfirmasi = '0' ORDER BY tb_distribusi.tanggal DESC";
+$query = "SELECT tb_distribusi.*, tb_users.nama, tb_sekolah.nama_sekolah as sekolah_tujuan FROM tb_distribusi 
+          JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users
+          JOIN tb_sekolah ON tb_sekolah.id_sekolah = tb_distribusi.id_sekolah_tujuan
+          WHERE tb_distribusi.status_konfirmasi = '0' AND tb_distribusi.status_pengiriman = '1' AND id_sekolah_tujuan = '$id_sekolah' 
+          ORDER BY tb_distribusi.tanggal DESC";
 $result = mysqli_query($conn, $query);
 
 // Jumlah seluruh data distribusi
-$q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi");
+$q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi WHERE id_sekolah_tujuan = '$id_sekolah'");
 $total_distribusi = mysqli_fetch_assoc($q_total)['total'];
 
 // Jumlah terkonfirmasi (status = 1)
-$q_terkonfirmasi = mysqli_query($conn, "SELECT COUNT(*) AS terkonfirmasi FROM tb_distribusi WHERE status_konfirmasi = '1'");
+$q_terkonfirmasi = mysqli_query($conn, "SELECT COUNT(*) AS terkonfirmasi FROM tb_distribusi WHERE status_konfirmasi = '1' AND id_sekolah_tujuan = '$id_sekolah'");
 $terkonfirmasi = mysqli_fetch_assoc($q_terkonfirmasi)['terkonfirmasi'];
 
 // Jumlah belum terkonfirmasi (status = 0)
-$q_belum = mysqli_query($conn, "SELECT COUNT(*) AS belum FROM tb_distribusi WHERE status_konfirmasi = '0'");
+$q_belum = mysqli_query($conn, "SELECT COUNT(*) AS belum FROM tb_distribusi WHERE status_konfirmasi = '0' AND id_sekolah_tujuan = '$id_sekolah'");
 $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
 
 ?>
@@ -111,8 +122,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
       <!-- Layout container -->
       <div class="layout-page">
         <!-- Navbar -->
-        <nav
-          class="layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
+        <nav class="layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme"
           id="layout-navbar">
           <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
             <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
@@ -138,19 +148,20 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                       <div class="d-flex">
                         <div class="flex-shrink-0 me-3">
                           <div class="avatar avatar-online">
-                            <img src="../../../assets/img/avatars/1.png" alt="alt" class="w-px-40 h-auto rounded-circle" />
+                            <img src="../../../assets/img/avatars/1.png" alt="alt"
+                              class="w-px-40 h-auto rounded-circle" />
                           </div>
                         </div>
                         <div class="flex-grow-1">
-                          <h6 class="mb-0">John Doe</h6>
-                          <small class="text-body-secondary">Admin</small>
+                          <h6 class="mb-0"><?php echo $_SESSION['nama']; ?></h6>
+                          <small class="text-body-secondary"><?php echo $_SESSION['role']; ?></small>
                         </div>
                       </div>
                     </a>
                   </li>
                   <li>
                     <div class="d-grid px-4 pt-2 pb-1">
-                      <a class="btn btn-danger d-flex" href="javascript:void(0);">
+                      <a class="btn btn-danger d-flex" href="../../../php/logout.php">
                         <small class="align-middle">Logout</small>
                         <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                       </a>
@@ -165,7 +176,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
         <!-- / Navbar -->
 
         <!-- Content wrapper -->
-        <div class="content-wrapper d-flex flex-column h-100">
+        <div class="content-wrapper">
           <!-- Content -->
           <div class="container-xxl flex-grow-1 container-p-y d-flex flex-column h-100 pb-0">
             <div class="mb-4">
@@ -175,20 +186,20 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                 </ol>
               </nav>
             </div>
-            <div class="row gy-6 h-100 flex-grow-1">
-              <!-- Dashboard -->
+            <div class="row gy-3">
+              <!-- Dashboard Card -->
               <div class="col-12">
-                <div class="card">
+                <div class="card h-100">
                   <div class="card-header">
                     <div class="d-flex align-items-center justify-content-between">
                       <h4 class="card-title text-success mb-0 fw-bold">Dashboard Admin Sekolah</h4>
                     </div>
                   </div>
-                  <div class="card-body pt-lg-10">
+                  <div class="card-body">
                     <div class="row g-6">
                       <div class="col-md-4 col-6">
                         <div class="d-flex align-items-center">
-                          <div class="avatar">
+                          <div class="avatar avatar-md">
                             <div class="avatar-initial bg-primary rounded shadow-xs">
                               <i class="icon-base ri ri-pie-chart-2-line icon-24px"></i>
                             </div>
@@ -201,7 +212,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                       </div>
                       <div class="col-md-4 col-6">
                         <div class="d-flex align-items-center">
-                          <div class="avatar">
+                          <div class="avatar avatar-md">
                             <div class="avatar-initial bg-success rounded shadow-xs">
                               <i class="icon-base ri ri-check-double-line icon-24px"></i>
                             </div>
@@ -214,7 +225,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                       </div>
                       <div class="col-md-4 col-6">
                         <div class="d-flex align-items-center">
-                          <div class="avatar">
+                          <div class="avatar avatar-md">
                             <div class="avatar-initial bg-warning rounded shadow-xs">
                               <i class="icon-base ri ri-check-line icon-24px"></i>
                             </div>
@@ -229,105 +240,113 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                   </div>
                 </div>
               </div>
-              <!--/ Dashboard -->
+              <!--/ Dashboard Card -->
 
-              <!-- Data Baru -->
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-header bg-transparent border-0 pt-4 pb-0 sticky-top bg-white">
-                    <h5 class="card-header text-success mb-0 fw-bold">Data Baru</h5>
-
+              <!-- Data Baru Table -->
+              <div class="col-md">
+                <div class="card overflow-hidden">
+                  <!-- Fixed Header -->
+                  <div class="card-header border-0 pt-4 pb-0 sticky-top bg-white">
+                    <h5 class="card-title text-success mb-0 fw-bold">Data Baru</h5>
+                    <hr class="mt-3 mb-0">
                   </div>
-                  <div class="card-body">
-                    <div class="table-responsive overflow-auto">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th class="text-truncate">Tanggal</th>
-                            <th class="text-truncate">Petugas Distribusi</th>
-                            <th class="text-truncate">Jumlah Distribusi</th>
-                            <th class="text-truncate">Status</th>
-                            <th class="text-truncate">Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <?php
-                          if (mysqli_num_rows($result) > 0) {
-                            while ($row = mysqli_fetch_assoc($result)) {
-                          ?>
-                              <tr>
-                                <td>
-                                  <div class="d-flex align-items-center">
-                                    <div>
-                                      <h6 class="mb-0 text-truncate"><?php echo $row['tanggal']; ?></h6>
+                  <!-- Scrollable Body -->
+                  <div class="card-body p-0">
+                    <div class="overflow-auto" style="height: calc(480px - 90px);">
+                      <div class="p-4">
+                        <table class="table-responsive table table-sm">
+                          <thead>
+                            <tr>
+                              <th class="text-truncate">Tanggal</th>
+                              <th class="text-truncate">Petugas Distribusi</th>
+                              <th class="text-truncate">Jumlah Distribusi</th>
+                              <th class="text-truncate">Status</th>
+                              <th class="text-truncate">Aksi</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php
+                            if (mysqli_num_rows($result) > 0) {
+                              while ($row = mysqli_fetch_assoc($result)) {
+                                $status_badge = $row['status_konfirmasi'] == '1' ? 'bg-label-success' : 'bg-label-warning';
+                                $status_text = $row['status_konfirmasi'] == '1' ? 'Terkonfirmasi' : 'Belum Terkonfirmasi';
+                            ?>
+                                <tr>
+                                  <td>
+                                    <div class="d-flex align-items-center">
+                                      <div>
+                                        <h6 class="mb-0 text-truncate"><?php echo $row['tanggal']; ?></h6>
+                                      </div>
                                     </div>
-                                  </div>
-                                </td>
-                                <td class="text-truncate"><?php echo $row['nama']; ?></td>
-                                <td class="text-truncate">
-                                  <span><?php echo $row['jumlah']; ?></span>
-                                </td>
-                                <td><span class="badge bg-label-warning rounded-pill">Belum Terkonfirmasi</span></td>
-                                <td>
-                                  <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-success btnDetail"
-                                      data-bs-toggle="modal"
-                                      data-bs-target="#ModalDetail"
-                                      data-id_distribusi="<?= $row['nama'] ?>"
-                                      data-tanggal="<?= $row['tanggal'] ?>"
-                                      data-jumlah="<?= $row['jumlah'] ?>"
-                                      data-tujuan="<?= $row['tujuan'] ?>"
-                                      data-lokasi_gps="<?= $row['lokasi_gps'] ?>">Detail</button>
-                                  </div>
-                                </td>
+                                  </td>
+                                  <td class="text-truncate"><?php echo $row['nama']; ?></td>
+                                  <td class="text-truncate">
+                                    <span><?php echo $row['jumlah']; ?></span>
+                                  </td>
+                                  <td>
+                                    <span class="badge <?php echo $status_badge; ?> rounded-pill"><?php echo $status_text; ?></span>
+                                  </td>
+                                  <td>
+                                    <div class="btn-group">
+                                      <button type="button" class="btn btn-sm btn-outline-success btnDetail"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#ModalDetail"
+                                        data-id_distribusi="<?= $row['id_distribusi'] ?>"
+                                        data-tanggal="<?= $row['tanggal'] ?>"
+                                        data-jumlah="<?= $row['jumlah'] ?>"
+                                        data-tujuan="<?= $row['sekolah_tujuan'] ?>"
+                                        data-lokasi_gps="<?= $row['lokasi_gps'] ?>"
+                                        data-nama="<?= $row['nama'] ?>">
+                                        Detail
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
                               <?php
-                            }
-                          } else {
+                              }
+                            } else {
                               ?>
                               <tr>
                                 <td colspan="5" class="text-center">Tidak ada data distribusi</td>
                               </tr>
                             <?php
-                          }
+                            }
                             ?>
-                        </tbody>
-                      </table>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
+                  <!--/ Data Baru Table -->
                 </div>
               </div>
-              <!--/ Data Baru -->
             </div>
 
             <!-- Modal Detail -->
             <div class="modal fade" id="ModalDetail" tabindex="-1" aria-hidden="true">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                  <div class="modal-header">
+                  <div class="modal-header align-items-center">
                     <img src="../../../assets/img/avatars/1.png" alt="Petugas" class="rounded"
                       style="width:48px; height:48px; object-fit:cover;">
                     <div class="ms-2">
                       <div class="fw-semibold"><span id="detailTujuan"></span></div>
-                      <small class="text-muted">Petugas: <span id="detailIdDistribusi"></span></small>
+                      <small class="text-muted">Petugas: <span id="detailNama"></span></small>
                     </div>
                   </div>
                   <div class="modal-body">
                     <div class="mb-2">
-                      <span class="me-2"><b>Dikirim:</b> <span id="detailJumlah"></span></span>
-                      <span class="me-2"><b>Tgl:</b> <span id="detailTanggal"></span></span>
+                      <span class="me-2"><b>ID Distribusi:</b> <span id="detailIdDistribusi"></span></span><br>
+                      <span class="me-2"><b>Dikirim:</b> <span id="detailJumlah"></span></span><br>
+                      <span class="me-2"><b>Tgl:</b> <span id="detailTanggal"></span></span><br>
                       <span>
-                        <br>
-                        <b>Lokasi:</b>
-                        <a href="#" class="text-primary text-decoration-underline"><i class="ri-map-pin-2-fill">
-                            <span id="detailLokasi"></span>
-                          </i></a>
-                        <button type="button" class="btn btn-outline-info btn-sm ms-2" data-bs-toggle="modal"
-                          data-bs-target="#modalMap">
-                          Preview Map
+                        <b>Lokasi GPS:</b>
+                        <span id="detailLokasi"></span>
+                        <button type="button" class="btn btn-outline-info btn-sm ms-2" id="btnPreviewMap">
+                          <i class="ri-map-pin-line"></i>
                         </button>
                       </span>
                     </div>
-
                   </div>
                 </div>
               </div>
@@ -343,7 +362,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                   </div>
                   <div class="modal-body p-0">
                     <iframe id="googleMapFrame"
-                      src="https://maps.google.com/maps?q=-0.8898208520946149, 131.32141749340488&z=15&output=embed"
+                      src=""
                       width="100%" height="400" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false"
                       tabindex="0"></iframe>
                   </div>
@@ -357,8 +376,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
         <!-- Footer -->
         <footer class="content-footer footer bg-footer-theme">
           <div class="container-xxl">
-            <div
-              class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+            <div class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
               <div class="mb-2 mb-md-0">
                 &#169;
                 <script>
@@ -398,6 +416,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
       let jumlah = $(this).data("jumlah");
       let lokasi = $(this).data("lokasi_gps");
       let tujuan = $(this).data("tujuan");
+      let nama = $(this).data("nama");
 
       // Isi modal
       $("#detailIdDistribusi").text(id_distribusi);
@@ -405,12 +424,17 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
       $("#detailJumlah").text(jumlah);
       $("#detailTujuan").text(tujuan);
       $("#detailLokasi").text(lokasi);
+      $("#detailNama").text(nama);
 
+      // Simpan lokasi GPS untuk tombol map
+      $("#btnPreviewMap").data("lokasi", lokasi);
+    });
+
+    $(document).on("click", "#btnPreviewMap", function() {
+      let lokasi = $(this).data("lokasi");
       if (lokasi) {
-        $("#detailLokasiLink").attr("href", "https://maps.google.com/maps?q=" + lokasi)
-          .text(lokasi);
-      } else {
-        $("#detailLokasiLink").text("Tidak ada lokasi");
+        $("#googleMapFrame").attr("src", "https://maps.google.com/maps?q=" + lokasi + "&z=15&output=embed");
+        $("#modalMap").modal("show");
       }
     });
   </script>

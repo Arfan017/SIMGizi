@@ -1,20 +1,22 @@
 <!doctype html>
 
 <?php
-if (session_status() == PHP_SESSION_NONE) session_start();
-if (!isset($_SESSION['user_id'])) {
-    header('Location: /index.php');
-    exit;
+session_start();
+if (!isset($_SESSION['role'])) {
+    header('Location: ../../../index.php');
+    exit();
 }
 
 include "../../../php/config.php";
 
 // Query to get account data
-$query = "SELECT tb_distribusi.* , tb_users.nama FROM tb_distribusi JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users";
+$query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
+            JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 
+            JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users";
 $result = mysqli_query($conn, $query);
 
 // Jumlah seluruh data diterima
-$q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi WHERE status_pengiriman = '1'");
+$q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi WHERE status_pengiriman = '2'");
 $total_diterima = mysqli_fetch_assoc($q_total)['total'];
 
 // Jumlah terkirim (status = 1)
@@ -76,7 +78,7 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link">
+                    <a href="index.php" class="app-brand-link">
                         <i class="icon-menu icon-base ri ri-home-office-line icon-32px bg-info"></i>
                         <span class="app-brand-text demo menu-text fw-semibold ms-2">ADMIN KANTOR</span>
                     </a>
@@ -106,6 +108,13 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                         <a href="monitoring.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
                             <div data-i18n="Icons">Monitoring</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="Tracking_pengiriman.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-pin-distance-line"></i>
+                            <div data-i18n="Icons">Tracking Pengiriman</div>
                         </a>
                     </li>
 
@@ -157,15 +166,15 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h6 class="mb-0">John Doe</h6>
-                                                    <small class="text-body-secondary">Admin</small>
+                                                    <h6 class="mb-0"><?php echo $_SESSION['nama']; ?></h6>
+                                                    <small class="text-body-secondary"><?php echo $_SESSION['role']; ?></small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="d-grid px-4 pt-2 pb-1">
-                                            <a class="btn btn-danger d-flex" href="javascript:void(0);">
+                                            <a class="btn btn-danger d-flex" href="../../../php/logout.php">
                                                 <small class="align-middle">Logout</small>
                                                 <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                             </a>
@@ -182,29 +191,30 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                 <!-- Content wrapper -->
                 <div class="content-wrapper d-flex flex-column h-100">
                     <!-- Content -->
-                    <div class="container-xxl flex-grow-1 container-p-y d-flex flex-column h-100">
+                    <div class="container-xxl flex-grow-1 container-p-y d-flex flex-column h-100 pb-0">
                         <div class="mb-4">
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
-                                    <li class="breadcrumb-item active" aria-current="page"><a href="index.html">Dashboard</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page"><a href="index.php">Dashboard</a></li>
                                 </ol>
                             </nav>
                         </div>
-                        <div class="row gy-6 h-100">
+                        <div class="row gy-3 h-100">
                             <!-- Card Dashboard -->
                             <div class="col-12">
                                 <div class="card h-100">
                                     <div class="card-header">
-                                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
-                                            <h4 class="card-title text-info mb-0 fw-bold">Dashboard</h4>
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap">
+                                            <h4 class="card-title text-info mb-0 fw-bold">Dashboard Admin Kantor</h4>
                                         </div>
                                     </div>
                                     <div class="card-body">
                                         <div class="row g-6">
                                             <div class="col-md-4 col-6">
                                                 <div class="d-flex align-items-center">
-                                                    <div class="avatar">
-                                                        <div class="avatar-initial bg-info rounded shadow-xs">
+                                                    <div class="avatar avatar-md">
+                                                        <!-- <img src="..." class="rounded" style="width:64px; height:64px; object-fit:cover;"> -->
+                                                        <div class="avatar-initial bg-info rounded shadow-xs ">
                                                             <i class="icon-base ri ri-time-line icon-24px"></i>
                                                         </div>
                                                     </div>
@@ -216,7 +226,7 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                                             </div>
                                             <div class="col-md-4 col-6">
                                                 <div class="d-flex align-items-center">
-                                                    <div class="avatar">
+                                                    <div class="avatar avatar-md">
                                                         <div class="avatar-initial bg-success rounded shadow-xs">
                                                             <i class="icon-base ri ri-check-double-line icon-24px"></i>
                                                         </div>
@@ -229,7 +239,7 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                                             </div>
                                             <div class="col-md-4 col-6">
                                                 <div class="d-flex align-items-center">
-                                                    <div class="avatar">
+                                                    <div class="avatar avatar-md">
                                                         <div class="avatar-initial bg-warning rounded shadow-xs">
                                                             <i class="icon-base ri ri-check-line icon-24px"></i>
                                                         </div>
@@ -247,12 +257,10 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
 
                             <!-- Card Laporan Evaluasi -->
                             <div class="col-md">
-                                <div class="card border-0 shadow-sm rounded-4" style="height: 100%;">
+                                <div class="card" style="height: 100%;">
                                     <!-- Fixed Header -->
                                     <div class="card-header border-0 pt-4 pb-0 sticky-top bg-white">
-                                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
-                                            <h4 class="card-title text-info mb-0 fw-bold">Laporan Evaluasi</h4>
-                                        </div>
+                                        <h5 class="card-title text-info mb-0 fw-bold">Laporan Evaluasi</h5>
                                         <hr class="mt-3 mb-0">
                                     </div>
 
@@ -313,12 +321,10 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
 
                             <!-- Card Laporan Evaluasi -->
                             <div class="col-md">
-                                <div class="card border-0 shadow-sm rounded-4" style="height: 100%;">
+                                <div class="card" style="height: 100%;">
                                     <!-- Fixed Header -->
                                     <div class="card-header border-0 pt-4 pb-0 sticky-top bg-white">
-                                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
-                                            <h4 class="card-title text-info mb-0 fw-bold">Laporan Evaluasi</h4>
-                                        </div>
+                                        <h5 class="card-title text-info mb-0 fw-bold">Data Distribusi</h5>
                                         <hr class="mt-3 mb-0">
                                     </div>
 
@@ -342,10 +348,24 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                                                         ?>
                                                                 <tr>
                                                                     <td class="text-truncate"><?php echo $row['tanggal']; ?></td>
-                                                                    <td class="text-truncate"><?php echo $row['tujuan']; ?></td>
+                                                                    <td class="text-truncate"><?php echo $row['sekolah_tujuan']; ?></td>
                                                                     <td class="text-truncate"><?php echo $row['nama']; ?></td>
-                                                                    <td class="text-truncate">
-                                                                        <span class="badge bg-label-info rounded-pill">Dikirim</span>
+                                                                    <td>
+                                                                        <?php
+                                                                        $status_badge = '';
+                                                                        if ($row['status_pengiriman'] === '0') {
+                                                                            $status_badge = 'bg-label-warning';
+                                                                            $status = 'Belum Dikirim';
+                                                                        } elseif ($row['status_pengiriman'] === '1') {
+                                                                            $status_badge = 'bg-label-info';
+                                                                            $status = 'Dikirim';
+                                                                        } elseif ($row['status_pengiriman'] === '2') {
+                                                                            $status_badge = 'bg-label-success';
+                                                                            $status = 'Diterima';
+                                                                        }
+
+                                                                        ?>
+                                                                        <span class="badge <?php echo $status_badge; ?> rounded-pill"><?php echo $status; ?></span>
                                                                     </td>
                                                                 </tr>
                                                         <?php

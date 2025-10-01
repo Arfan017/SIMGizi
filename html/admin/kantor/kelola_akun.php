@@ -1,11 +1,20 @@
 <!doctype html>
 
 <?php
+session_start();
+if (!isset($_SESSION['role'])) {
+    header('Location: ../../../index.php');
+    exit();
+}
 include '../../../php/config.php';
 
 // Query to get account data
-$query = "SELECT * FROM tb_users";
+$query = "SELECT tb_users.*, 
+                 IF(tb_users.id_asal_sekolah = NULL, '-', tb_sekolah.nama_sekolah) AS asal_sekolah 
+          FROM tb_users 
+          LEFT JOIN tb_sekolah ON tb_users.id_asal_sekolah = tb_sekolah.id_sekolah order by tb_users.id_users ASC";
 $result = mysqli_query($conn, $query);
+
 ?>
 
 <html lang="en" class="layout-menu-fixed layout-compact" data-assets-path="../../../assets/"
@@ -89,6 +98,13 @@ $result = mysqli_query($conn, $query);
                     </li>
 
                     <li class="menu-item">
+                        <a href="Tracking_pengiriman.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-pin-distance-line"></i>
+                            <div data-i18n="Icons">Tracking Pengiriman</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
                         <a href="laporan_evaluasi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-list-check-3"></i>
                             <div data-i18n="Icons">Laporan & Evaluasi</div>
@@ -137,15 +153,15 @@ $result = mysqli_query($conn, $query);
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <h6 class="mb-0">John Doe</h6>
-                                                    <small class="text-body-secondary">Admin</small>
+                                                    <h6 class="mb-0"><?php echo $_SESSION['nama']; ?></h6>
+                                                    <small class="text-body-secondary"><?php echo $_SESSION['role']; ?></small>
                                                 </div>
                                             </div>
                                         </a>
                                     </li>
                                     <li>
                                         <div class="d-grid px-4 pt-2 pb-1">
-                                            <a class="btn btn-danger d-flex" href="javascript:void(0);">
+                                            <a class="btn btn-danger d-flex" href="../../../php/logout.php">
                                                 <small class="align-middle">Logout</small>
                                                 <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                             </a>
@@ -201,6 +217,8 @@ $result = mysqli_query($conn, $query);
                                                     <th class="text-truncate">Nama</th>
                                                     <th class="text-truncate">Peran</th>
                                                     <th class="text-truncate">Username</th>
+                                                    <th class="text-truncate">Asal Sekolah</th>
+                                                    <th class="text-truncate">No HP</th>
                                                     <th class="text-truncate">Status</th>
                                                     <th class="text-truncate">Aksi</th>
                                                 </tr>
@@ -218,6 +236,8 @@ $result = mysqli_query($conn, $query);
                                                             <td class="text-truncate">
                                                                 <span><?php echo $row['username']; ?></span>
                                                             </td>
+                                                            <td class="text-truncate"><?php echo $row['asal_sekolah'] ?? "-"; ?></td>
+                                                            <td class="text-truncate"><?php echo $row['no_hp']; ?></td>
                                                             <td><span class="badge <?php echo $status_badge; ?> rounded-pill"><?php echo $row['status']; ?></span></td>
                                                             <td>
                                                                 <div>
@@ -228,7 +248,9 @@ $result = mysqli_query($conn, $query);
                                                                         data-username="<?= $row['username'] ?>"
                                                                         data-nama="<?= $row['nama'] ?>"
                                                                         data-peran="<?= $row['role'] ?>"
-                                                                        data-password="<?= $row['password'] ?>">
+                                                                        data-password="<?= $row['password'] ?>"
+                                                                        data-no_hp="<?= $row['no_hp'] ?>"
+                                                                        data-status="<?= $row['status'] ?>">
                                                                         <span class="icon-base ri ri-info-card-line icon-16px me-1_5"></span>Edit
                                                                     </button>
                                                                     <button type="button" class="btn btn-sm btn-outline-danger btnHapusAkun"
@@ -238,7 +260,8 @@ $result = mysqli_query($conn, $query);
                                                                         data-username="<?= $row['username'] ?>"
                                                                         data-nama="<?= $row['nama'] ?>"
                                                                         data-peran="<?= $row['role'] ?>"
-                                                                        data-password="<?= $row['password'] ?>">
+                                                                        data-password="<?= $row['password'] ?>"
+                                                                        data-no_hp="<?= $row['no_hp'] ?>">
                                                                         <span class="icon-base ri ri-delete-bin-2-line icon-16px me-1_5"></span>Hapus
                                                                     </button>
                                                                 </div>
@@ -304,6 +327,30 @@ $result = mysqli_query($conn, $query);
                                                     <div class="form-floating form-floating-outline">
                                                         <input type="password" name="password" class="form-control" placeholder="Masukkan Password" required />
                                                         <label>Password</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row g-4" id="rowAsalSekolah" style="display:none;">
+                                                <div class="col mb-2">
+                                                    <div class="form-floating form-floating-outline">
+                                                        <select class="form-select" name="id_asal_sekolah" id="asalSekolah">
+                                                            <option value="">Pilih Asal Sekolah</option>
+                                                            <?php
+                                                            $q_sekolah = mysqli_query($conn, "SELECT id_sekolah, nama_sekolah FROM tb_sekolah");
+                                                            while ($sekolah = mysqli_fetch_assoc($q_sekolah)) {
+                                                                echo '<option value="' . $sekolah['id_sekolah'] . '">' . $sekolah['nama_sekolah'] . '</option>';
+                                                            }
+                                                            ?>
+                                                        </select>
+                                                        <label>Asal Sekolah</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row g-4">
+                                                <div class="col mb-2">
+                                                    <div class="form-floating form-floating-outline">
+                                                        <input type="text" name="no_hp" class="form-control" placeholder="Masukkan No HP" required />
+                                                        <label>No HP</label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -419,6 +466,31 @@ $result = mysqli_query($conn, $query);
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="row g-4">
+                                                <div class="col mb-2">
+                                                    <div class="form-floating form-floating-outline">
+                                                        <input type="text" name="no_hp" id="editNoHp" class="form-control" placeholder="Masukkan No HP" required />
+                                                        <label>No HP</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-4" id="rowEditAsalSekolah" style="display:none;">
+                                                <div class="col mb-2">
+                                                    <div class="form-floating form-floating-outline">
+                                                        <select class="form-select" name="id_asal_sekolah" id="editAsalSekolah">
+                                                            <option value="">Pilih Asal Sekolah</option>
+                                                            <?php
+                                                            $q_sekolah = mysqli_query($conn, "SELECT id_sekolah, nama_sekolah FROM tb_sekolah");
+                                                            while ($sekolah = mysqli_fetch_assoc($q_sekolah)) {
+                                                                echo '<option value="' . $sekolah['id_sekolah'] . '">' . $sekolah['nama_sekolah'] . '</option>';
+                                                            }
+                                                            ?>
+                                                        </select>
+                                                        <label>Asal Sekolah</label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="form-floating form-floating-outline">
                                                 <select class="form-select" name="status" id="editStatus" required>
                                                     <option value="Aktif">Aktif</option>
@@ -480,6 +552,18 @@ $result = mysqli_query($conn, $query);
 
     <script>
         $(document).ready(function() {
+            $('select[name="role"]').on('change', function() {
+                if ($(this).val() === 'admin_sekolah') {
+                    $('#rowAsalSekolah').show();
+                    $('#asalSekolah').prop('required', true);
+                } else {
+                    $('#rowAsalSekolah').hide();
+                    $('#asalSekolah').prop('required', false);
+                }
+            });
+        });
+
+        $(document).ready(function() {
             $("#formTambahAkun").on("submit", function(e) {
                 e.preventDefault(); // cegah reload
 
@@ -520,116 +604,157 @@ $result = mysqli_query($conn, $query);
                     }
                 });
             });
+        });
 
-            $("#formHapusAkun").on("submit", function(e) {
-                e.preventDefault(); // cegah reload
+        $("#formHapusAkun").on("submit", function(e) {
+            e.preventDefault(); // cegah reload
 
-                $.ajax({
-                    url: "../../../php/kantor/crud_akun.php",
-                    type: "POST",
-                    data: $(this).serialize() + "&delete=1",
-                    dataType: "json",
-                    success: function(response) {
-                        let alertClass = "";
-                        if (response.status === "success") {
-                            alertClass = "alert-success";
-                            $("#formHapusAkun")[0].reset();
-                            $("#ModalHapusAkun").modal("hide");
-                            setTimeout(function() {
-                                location.reload(); // refresh tabel agar data baru muncul
-                            }, 1000);
-                        } else if (response.status === "exists") {
-                            alertClass = "alert-warning";
-                        } else {
-                            alertClass = "alert-danger";
-                        }
+            $.ajax({
+                url: "../../../php/kantor/crud_akun.php",
+                type: "POST",
+                data: $(this).serialize() + "&delete=1",
+                dataType: "json",
+                success: function(response) {
+                    let alertClass = "";
+                    if (response.status === "success") {
+                        alertClass = "alert-success";
+                        $("#formHapusAkun")[0].reset();
+                        $("#ModalHapusAkun").modal("hide");
+                        setTimeout(function() {
+                            location.reload(); // refresh tabel agar data baru muncul
+                        }, 1000);
+                    } else if (response.status === "exists") {
+                        alertClass = "alert-warning";
+                    } else {
+                        alertClass = "alert-danger";
+                    }
 
-                        $("#alertContainer").html(`
+                    $("#alertContainer").html(`
                     <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
                         <strong>${response.status.toUpperCase()}!</strong> ${response.message}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 `);
-                    },
-                    error: function() {
-                        $("#alertContainer").html(`
+                },
+                error: function() {
+                    $("#alertContainer").html(`
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <strong>ERROR!</strong> Tidak dapat terhubung ke server.
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 `);
+                }
+            });
+        });
+
+        $(document).on('click', '.btnHapusAkun', function() {
+            var id_users = $(this).data('id_users');
+            var nama = $(this).data('nama');
+            var peran = $(this).data('peran');
+            var username = $(this).data('username');
+            var password = $(this).data('password');
+
+            // Isi data ke input modal
+            $('#hapusIdUsers').val(id_users);
+            $('#hapusNama').val(nama);
+            $('#hapusPeran').val(peran);
+            $('#hapusUsername').val(username);
+            $('#hapusPassword').val(password);
+        });
+
+        $("#formEditAkun").on("submit", function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: "../../../php/kantor/crud_akun.php",
+                type: "POST",
+                data: $(this).serialize() + "&update=1",
+                dataType: "json",
+                success: function(response) {
+                    let alertClass = "";
+                    if (response.status === "success") {
+                        alertClass = "alert-success";
+                        $("#formEditAkun")[0].reset();
+                        $("#ModalEditAkun").modal("hide");
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        alertClass = "alert-danger";
                     }
-                });
-            });
-
-            $(document).on('click', '.btnHapusAkun', function() {
-                var id_users = $(this).data('id_users');
-                var nama = $(this).data('nama');
-                var peran = $(this).data('peran');
-                var username = $(this).data('username');
-                var password = $(this).data('password');
-
-                // Isi data ke input modal
-                $('#hapusIdUsers').val(id_users);
-                $('#hapusNama').val(nama);
-                $('#hapusPeran').val(peran);
-                $('#hapusUsername').val(username);
-                $('#hapusPassword').val(password);
-            });
-
-            $("#formEditAkun").on("submit", function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: "../../../php/kantor/crud_akun.php",
-                    type: "POST",
-                    data: $(this).serialize() + "&update=1",
-                    dataType: "json",
-                    success: function(response) {
-                        let alertClass = "";
-                        if (response.status === "success") {
-                            alertClass = "alert-success";
-                            $("#formEditAkun")[0].reset();
-                            $("#ModalEditAkun").modal("hide");
-                            setTimeout(function() {
-                                location.reload();
-                            }, 1000);
-                        } else {
-                            alertClass = "alert-danger";
-                        }
-                        $("#alertContainer").html(`
+                    $("#alertContainer").html(`
                             <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
                                 <strong>${response.status.toUpperCase()}!</strong> ${response.message}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         `);
-                    },
-                    error: function() {
-                        $("#alertContainer").html(`
+                },
+                error: function() {
+                    $("#alertContainer").html(`
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <strong>ERROR!</strong> Tidak dapat terhubung ke server.
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         `);
-                    }
-                });
+                }
+            });
+        });
+
+        $(document).on('click', '.btnEditAkun', function() {
+            var id_users = $(this).data('id_users');
+            var nama = $(this).data('nama');
+            var peran = $(this).data('peran');
+            var username = $(this).data('username');
+            var password = $(this).data('password');
+            var no_hp = $(this).data('no_hp');
+
+            // Isi data ke input modal
+            $('#editIdUsers').val(id_users);
+            $('#editNama').val(nama);
+            $('#editPeran').val(peran);
+            $('#editUsername').val(username);
+            $('#editNoHp').val(no_hp);
+        });
+
+        $(document).ready(function() {
+            // Tampilkan/hide dropdown asal sekolah saat peran diubah
+            $('#editPeran').on('change', function() {
+                if ($(this).val() === 'admin_sekolah') {
+                    $('#rowEditAsalSekolah').show();
+                    $('#editAsalSekolah').prop('required', true);
+                } else {
+                    $('#rowEditAsalSekolah').hide();
+                    $('#editAsalSekolah').prop('required', false);
+                }
             });
 
+            // Isi data ke modal edit akun
             $(document).on('click', '.btnEditAkun', function() {
                 var id_users = $(this).data('id_users');
                 var nama = $(this).data('nama');
                 var peran = $(this).data('peran');
                 var username = $(this).data('username');
                 var password = $(this).data('password');
+                var no_hp = $(this).data('no_hp');
+                var id_asal_sekolah = $(this).data('id_asal_sekolah') || '';
 
-                // Isi data ke input modal
                 $('#editIdUsers').val(id_users);
                 $('#editNama').val(nama);
                 $('#editPeran').val(peran);
                 $('#editUsername').val(username);
-                // $('#editPassword').val(password);
+                $('#editNoHp').val(no_hp);
+
+                // Set asal sekolah jika ada
+                $('#editAsalSekolah').val(id_asal_sekolah);
+
+                // Tampilkan dropdown asal sekolah jika peran admin_sekolah
+                if (peran === 'admin_sekolah') {
+                    $('#rowEditAsalSekolah').show();
+                    $('#editAsalSekolah').prop('required', true);
+                } else {
+                    $('#rowEditAsalSekolah').hide();
+                    $('#editAsalSekolah').prop('required', false);
+                }
             });
-
-
         });
     </script>
 
