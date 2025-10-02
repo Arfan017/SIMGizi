@@ -19,7 +19,7 @@ $query = "SELECT tb_distribusi.*, tb_users.nama, tb_sekolah.nama_sekolah as seko
 $result = mysqli_query($conn, $query);
 
 // Jumlah seluruh data distribusi
-$q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi WHERE id_sekolah_tujuan = '$id_sekolah'");
+$q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi WHERE status_konfirmasi = '1' AND id_sekolah_tujuan = '$id_sekolah'");
 $total_distribusi = mysqli_fetch_assoc($q_total)['total'];
 
 // Jumlah terkonfirmasi (status = 1)
@@ -343,7 +343,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                         <b>Lokasi GPS:</b>
                         <span id="detailLokasi"></span>
                         <button type="button" class="btn btn-outline-info btn-sm ms-2" id="btnPreviewMap">
-                          <i class="ri-map-pin-line"></i>
+                          <i class="icon-base ri ri-map-pin-line"></i>
                         </button>
                       </span>
                     </div>

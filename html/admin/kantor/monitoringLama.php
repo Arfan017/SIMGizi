@@ -185,16 +185,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
 
                                             <h4 class="card-title text-info mb-0 fw-bold">Monitoring</h4>
                                             <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
-                                                <!-- <button class="btn btn-outline-info w-50" type="button">
-                                                    <span class="icon-base ri ri-printer-line icon-16px me-1_5"></span>Cetak
-                                                </button>
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text bg-white border-end-0">
-                                                        <i class="icon-base ri ri-search-line text-muted"></i>
-                                                    </span>
-                                                    <input type="text" class="form-control border-start-0"
-                                                        placeholder="Cari monitoring...">
-                                                </div> -->
                                                 <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="modal" data-bs-target="#ModalFilterData">
                                                     <span class="icon-base ri ri-filter-line icon-16px me-1_5"></span>Filter
                                                 </button>

@@ -428,73 +428,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
             }
         }
 
-
-        // $(document).ready(function() {
-        //     $('#btnFilterMonitoring').on('click', function() {
-        //         var tanggalMulai = $('#filterTanggalMulai').val();
-        //         var tanggalAkhir = $('#filterTanggalAkhir').val();
-        //         var sekolah = $('#filterSekolah').val();
-        //         var statusPengiriman = $('#filterStatusPengiriman').val();
-
-        //         $.ajax({
-        //             url: '../../../php/distribusi/filter_data_distribusi.php',
-        //             type: 'POST',
-        //             data: {
-        //                 tanggal_mulai: tanggalMulai,
-        //                 tanggal_akhir: tanggalAkhir,
-        //                 sekolah: sekolah,
-        //                 status_pengiriman: statusPengiriman
-        //             },
-        //             dataType: 'json',
-        //             success: function(response) {
-        //                 var tbody = '';
-        //                 if (response.length > 0) {
-        //                     $.each(response, function(i, row) {
-        //                         let badge = '';
-        //                         let statusText = '';
-        //                         if (row.status_pengiriman == '0') {
-        //                             badge = 'bg-label-warning';
-        //                             statusText = 'Belum Dikirim';
-        //                         } else if (row.status_pengiriman == '1') {
-        //                             badge = 'bg-label-info';
-        //                             statusText = 'Dikirim';
-        //                         } else if (row.status_pengiriman == '2') {
-        //                             badge = 'bg-label-success';
-        //                             statusText = 'Diterima';
-        //                         }
-
-        //                         // Kolom aksi
-        //                         let aksi = '';
-        //                         if (row.status_pengiriman == '0') {
-        //                             aksi = `<button type="button" class="btn btn-sm btn-outline-success btnKirim" data-id="${row.id_distribusi}">Kirim</button>`;
-        //                         } else if (row.status_pengiriman == '1') {
-        //                             aksi = `<button type="button" class="btn btn-sm btn-outline-danger btnBatalKirim" data-id="${row.id_distribusi}">Batal Kirim</button>`;
-        //                         } else {
-        //                             aksi = `<span class="text-muted">-</span>`;
-        //                         }
-
-        //                         tbody += `<tr>
-        //                     <td class="text-truncate">${row.tanggal}</td>
-        //                     <td class="text-truncate">${row.sekolah_tujuan}</td>
-        //                     <td class="text-truncate"><span>${row.nama}</span></td>
-        //                     <td><span class="badge ${badge} rounded-pill">${statusText}</span></td>
-        //                     <td>${aksi}</td>
-        //                 </tr>`;
-        //                     });
-        //                 } else {
-        //                     tbody = `<tr><td colspan="4" class="text-center">Data tidak ditemukan</td></tr>`;
-        //                 }
-        //                 $('.table tbody').html(tbody);
-        //                 $('#ModalFilterData').modal('hide');
-        //             },
-        //             error: function() {
-        //                 alert('Gagal memfilter data monitoring!');
-        //             }
-        //         });
-        //     });
-        // });
-
-        // BARU
         $(document).ready(function() {
             // Event listener untuk tombol KIRIM
             $(document).on('click', '.btnKirim', function() {
@@ -602,52 +535,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
 
         });
 
-        // LAMA
-        // $(document).on('click', '.btnKirim', function() {
-        //     var id = $(this).data('id');
-        //     $.ajax({
-        //         url: '../../../php/distribusi/update_status_pengiriman.php',
-        //         type: 'POST',
-        //         data: {
-        //             id_distribusi: id,
-        //             status: '1'
-        //         },
-        //         dataType: 'json',
-        //         success: function(response) {
-        //             if (response.status === 'success') {
-        //                 location.reload();
-        //             } else {
-        //                 alert(response.message || 'Gagal mengubah status!');
-        //             }
-        //         },
-        //         error: function() {
-        //             alert('Gagal mengubah status!');
-        //         }
-        //     });
-        // });
-
-        // $(document).on('click', '.btnBatalKirim', function() {
-        //     var id = $(this).data('id');
-        //     $.ajax({
-        //         url: '../../../php/distribusi/update_status_pengiriman.php',
-        //         type: 'POST',
-        //         data: {
-        //             id_distribusi: id,
-        //             status: '0'
-        //         },
-        //         dataType: 'json',
-        //         success: function(response) {
-        //             if (response.status === 'success') {
-        //                 location.reload();
-        //             } else {
-        //                 alert(response.message || 'Gagal mengubah status!');
-        //             }
-        //         },
-        //         error: function() {
-        //             alert('Gagal mengubah status!');
-        //         }
-        //     });
-        // });
     </script>
 
     <!-- endbuild -->

@@ -274,53 +274,6 @@ $result = mysqli_query($conn, $query);
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="row">
-                                <!-- Right side - List of Evaluations -->
-
-                                <!-- Left side - Evaluation Form -->
-                                <!-- <div class="col-lg-4 col-md-5 mb-4">
-                                <div class="card border-0 shadow-sm rounded-4">
-                                    <div class="card-header bg-transparent border-0 pt-4 pb-0">
-                                        <h5 class="card-title text-info">Form Evaluasi</h5>
-                                        <hr >
-                                    </div>
-                                    <div class="card-body">
-                                        <form>
-                                            <div class="mb-3">
-                                                <div class="d-flex align-items-center mb-2">
-                                                    <img src="../../../assets/img/avatars/1.png" alt="Petugas" class="rounded"
-                                                        style="width:48px; height:48px; object-fit:cover;">
-                                                    <div class="ms-2">
-                                                        <div class="fw-semibold">SDN 1</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-semibold">tanggal Evaluasi</label>
-                                                <input type="date" class="form-control form-control-sm" id="tanggal_evaluasi" placeholder="Tanggal Evaluasi">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-semibold">Status</label>
-                                                <select class="form-select form-select-sm">
-                                                    <option value="">Semua Status</option>
-                                                    <option>Baik</option>
-                                                    <option>Kurang Baik</option>
-                                                    <option>Bermasalah</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-semibold">Catatan</label>
-                                                <input type="text" class="form-control form-control-sm" id="catatan" placeholder="Catatan Evaluasi">
-                                            </div>
-                                            <button type="submit" class="btn btn-info btn-sm w-100">
-                                                <i class="ri-filter-3-line me-1"></i> Simpan Evaluasi
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div> -->
-                            </div>
                         </div>
                     </div>
                 </div>

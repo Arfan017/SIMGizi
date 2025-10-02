@@ -8,11 +8,6 @@ if (!isset($_SESSION['role'])) {
 }
 include '../../../php/config.php';
 
-// Query Lama
-// $query = "SELECT tb_distribusi.id_distribusi, tb_distribusi.nama_barang, tb_distribusi.jumlah, tb_sekolah.lokasi_gps, tb_sekolah.nama_sekolah FROM tb_distribusi
-//             JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah WHERE tb_distribusi.status_pengiriman = '0' AND tb_distribusi.tanggal = CURDATE()";
-
-// Ganti Query lama Anda
 $query = "SELECT 
             tb_distribusi.id_distribusi, 
             tb_distribusi.nama_barang, 
@@ -24,7 +19,7 @@ $query = "SELECT
             tb_sekolah.nama_sekolah 
           FROM tb_distribusi
           JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 
-          WHERE tb_distribusi.status_pengiriman IN ('0', '1', '2')AND tb_distribusi.tanggal = CURDATE()";
+          WHERE tb_distribusi.status_pengiriman IN ('0', '1', '2') AND tb_distribusi.tanggal = CURDATE()";
 
 $result = mysqli_query($conn, $query);
 
@@ -34,25 +29,8 @@ $resultkasikantor = mysqli_fetch_assoc($resultkasikantor);
 
 $lokasi_kantor = $resultkasikantor["lokasi"];
 
-// LAMA
-// $markers = [];
-// while ($row = mysqli_fetch_assoc($result)) {
-//     if (!empty($row['lokasi_gps'])) {
-//         $markers[] = [
-//             'id'      => $row['id_distribusi'],
-//             'barang'  => $row['nama_barang'],
-//             'jumlah'  => $row['jumlah'],
-//             'sekolah' => $row['nama_sekolah'],
-//             'gps'     => $row['lokasi_gps']
-//         ];
-//     }
-// }
-
-// BARU
-// Sesuaikan perulangan while
 $markers = [];
 while ($row = mysqli_fetch_assoc($result)) {
-    // Cukup pastikan salah satu GPS ada untuk ditampilkan
     if (!empty($row['lokasi_gps']) || !empty($row['gps_awal'])) {
         $markers[] = [
             'id'             => $row['id_distribusi'],
@@ -60,9 +38,9 @@ while ($row = mysqli_fetch_assoc($result)) {
             'jumlah'         => $row['jumlah'],
             'sekolah'        => $row['nama_sekolah'],
             'gps_tujuan'     => $row['lokasi_gps'],
-            'gps_awal'       => $row['gps_awal'],          // Data Baru
-            'jam_berangkat'  => $row['jam_berangkat'],     // Data Baru
-            'jam_tiba'       => $row['jam_tiba']           // Data Baru
+            'gps_awal'       => $row['gps_awal'],
+            'jam_berangkat'  => $row['jam_berangkat'],
+            'jam_tiba'       => $row['jam_tiba']
         ];
     }
 }
@@ -276,26 +254,6 @@ while ($row = mysqli_fetch_assoc($result)) {
                                 </div>
                             </div>
                         </div>
-
-                        <!-- LAMA -->
-                        <!-- <div class="row gy-6 h-100 flex-grow-1">
-                            Data Tables
-                            <div class="col-12 h-100">
-                                <div class="card overflow-hidden h-100">
-                                    <div class="card-header bg-white border-0 pt-4 pb-0 sticky-top bg-white">
-                                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
-                                            <h4 class="card-title text-info mb-0 fw-bold">Tracking Pengiriman</h4>
-                                        </div>
-                                        <div id="alertContainer"></div>
-                                        <hr class="mt-3 mb-3">
-                                    </div>
-
-                                    Map Container
-                                    <div class="map h-100" id="mapid" style="height:400px;"></div>
-                                </div>
-                            </div>
-                             Data Tables
-                        </div> -->
                     </div>
                     <!-- / Content -->
 
@@ -357,7 +315,6 @@ while ($row = mysqli_fetch_assoc($result)) {
         markersData.forEach(function(item) {
             var latLngAwal, latLngTujuan;
 
-            // --- Bagian Logika Peta (Tidak Berubah) ---
             if (item.gps_awal) {
 
                 var coordsAwal = item.gps_awal.split(",");
@@ -416,16 +373,10 @@ while ($row = mysqli_fetch_assoc($result)) {
                     }
                 }).addTo(map);
             }
-            // --- Akhir Bagian Logika Peta ---
 
-
-            // +++ BAGIAN BARU: Logika untuk mengisi tabel +++
-
-            // Siapkan data jam, ganti null dengan strip (-)
             var jamBerangkat = item.jam_berangkat ? item.jam_berangkat.substring(0, 5) : '-';
             var jamTiba = item.jam_tiba ? item.jam_tiba.substring(0, 5) : '-';
 
-            // Buat baris tabel (HTML string)
             var tableRow = `
             <tr>
                 <td>${item.sekolah}</td>
@@ -434,246 +385,18 @@ while ($row = mysqli_fetch_assoc($result)) {
             </tr>
         `;
 
-            // Tambahkan baris baru ke dalam tbody
             $('#delivery-table-body').append(tableRow);
 
-            // Naikkan nomor urut
             tableCounter++;
-            // +++ AKHIR BAGIAN BARU +++
         });
 
-        // Setelah selesai loop, zoom sekali ke semua marker
-        // Perlu sedikit delay agar peta di-render dengan benar di kolomnya
         setTimeout(function() {
             if (markersData.length > 0 && markerGroup.getLayers().length > 0) {
-                map.invalidateSize(); // Perintah ini penting setelah mengubah ukuran container peta
+                map.invalidateSize(); 
                 map.fitBounds(markerGroup.getBounds().pad(0.1));
             }
-        }, 500); // delay 500 milidetik
+        }, 500);
     </script>
-
-    <!-- BARU ROUTES -->
-    <!-- <script>
-        // Inisialisasi peta
-        var map = L.map('mapid').setView([-2.5, 118], 5);
-
-        // Ambil data dari PHP ke JS
-        var markersData = <?= json_encode($markers) ?>;
-
-        // Tambah layer tile OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Group untuk auto-zoom semua marker
-        var markerGroup = L.featureGroup().addTo(map);
-
-        // Loop semua data pengiriman
-        markersData.forEach(function(item) {
-            var latLngAwal, latLngTujuan;
-
-            // 1. Proses Titik Awal (Keberangkatan) - TIDAK ADA PERUBAHAN
-            if (item.gps_awal) {
-                var coordsAwal = item.gps_awal.split(",");
-                var latAwal = parseFloat(coordsAwal[0].trim());
-                var lonAwal = parseFloat(coordsAwal[1].trim());
-                latLngAwal = L.latLng(latAwal, lonAwal);
-
-                var popupAwal = `
-                <b>Status: Keberangkatan</b><br>
-                <b>Jam Berangkat:</b> ${item.jam_berangkat || 'N/A'}<br>
-                <hr class='my-1'>
-                <b>Tujuan:</b> ${item.sekolah}<br>
-                <b>Barang:</b> ${item.barang} (${item.jumlah})
-            `;
-
-                var markerAwal = L.marker(latLngAwal).bindPopup(popupAwal);
-                markerAwal.addTo(markerGroup);
-            }
-
-            // 2. Proses Titik Akhir (Tujuan) - TIDAK ADA PERUBAHAN
-            if (item.gps_tujuan) {
-                var coordsTujuan = item.gps_tujuan.split(",");
-                var latTujuan = parseFloat(coordsTujuan[0].trim());
-                var lonTujuan = parseFloat(coordsTujuan[1].trim());
-                latLngTujuan = L.latLng(latTujuan, lonTujuan);
-
-                var statusTiba = item.jam_tiba ? `<b>Jam Tiba:</b> ${item.jam_tiba}` : '<b>Status:</b> Masih dalam perjalanan';
-
-                var popupTujuan = `
-                <b>Tujuan: ${item.sekolah}</b><br>
-                ${statusTiba}<br>
-                <hr class='my-1'>
-                <b>Barang:</b> ${item.barang} (${item.jumlah})
-            `;
-
-                var markerTujuan = L.marker(latLngTujuan).bindPopup(popupTujuan);
-                markerTujuan.addTo(markerGroup);
-            }
-
-            // 3. Buat Rute Jalan Raya (Routing) - INI BAGIAN YANG DIUBAH
-            if (latLngAwal && latLngTujuan) {
-                L.Routing.control({
-                    waypoints: [
-                        latLngAwal,
-                        latLngTujuan
-                    ],
-                    show: false, // Menyembunyikan panel instruksi rute (belokan, dll)
-                    addWaypoints: false, // Mencegah pengguna menambahkan titik baru ke rute
-                    draggableWaypoints: false, // Mencegah titik A dan B digeser
-                    fitSelectedRoutes: false, // Mencegah peta auto-zoom ke setiap rute
-                    createMarker: function() {
-                        return null;
-                    }, // Tidak membuat marker A dan B default
-                    lineOptions: { // Opsi untuk kustomisasi garis rute
-                        styles: [{
-                            color: 'blue',
-                            opacity: 0.7,
-                            weight: 5
-                        }]
-                    }
-                }).addTo(map);
-            }
-        });
-
-        // Setelah selesai loop, zoom sekali ke semua marker
-        if (markersData.length > 0 && markerGroup.getLayers().length > 0) {
-            map.fitBounds(markerGroup.getBounds().pad(0.1));
-        }
-    </script> -->
-
-    <!-- BARU POLYLINE -->
-    <!-- <script>
-        // Inisialisasi peta
-        var map = L.map('mapid').setView([-2.5, 118], 5);
-
-        // Ambil data dari PHP ke JS
-        var markersData = <?= json_encode($markers) ?>;
-
-        // Tambah layer tile OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Group untuk auto-zoom semua marker
-        var markerGroup = L.featureGroup().addTo(map);
-
-        // Loop semua data pengiriman
-        markersData.forEach(function(item) {
-            var latLngAwal, latLngTujuan;
-
-            // 1. Proses Titik Awal (Keberangkatan)
-            if (item.gps_awal) {
-                var coordsAwal = item.gps_awal.split(",");
-                var latAwal = parseFloat(coordsAwal[0].trim());
-                var lonAwal = parseFloat(coordsAwal[1].trim());
-                latLngAwal = L.latLng(latAwal, lonAwal);
-
-                var popupAwal = `
-                    <b>Status: Keberangkatan</b><br>
-                    <b>Jam Berangkat:</b> ${item.jam_berangkat || 'N/A'}<br>
-                    <hr class='my-1'>
-                    <b>Tujuan:</b> ${item.sekolah}<br>
-                    <b>Barang:</b> ${item.barang} (${item.jumlah})
-                `;
-
-                // Buat marker untuk titik awal
-                var markerAwal = L.marker(latLngAwal).bindPopup(popupAwal);
-                markerAwal.addTo(markerGroup);
-            }
-
-            // 2. Proses Titik Akhir (Tujuan)
-            if (item.gps_tujuan) {
-                var coordsTujuan = item.gps_tujuan.split(",");
-                var latTujuan = parseFloat(coordsTujuan[0].trim());
-                var lonTujuan = parseFloat(coordsTujuan[1].trim());
-                latLngTujuan = L.latLng(latTujuan, lonTujuan);
-
-                // Cek apakah sudah tiba atau belum
-                var statusTiba = item.jam_tiba ? `<b>Jam Tiba:</b> ${item.jam_tiba}` : '<b>Status:</b> Masih dalam perjalanan';
-
-                var popupTujuan = `
-                    <b>Tujuan: ${item.sekolah}</b><br>
-                    ${statusTiba}<br>
-                    <hr class='my-1'>
-                    <b>Barang:</b> ${item.barang} (${item.jumlah})
-                `;
-
-                // Buat marker untuk titik tujuan
-                var markerTujuan = L.marker(latLngTujuan).bindPopup(popupTujuan);
-                markerTujuan.addTo(markerGroup);
-            }
-
-            // 3. Buat Garis Lurus Penghubung
-            if (latLngAwal && latLngTujuan) {
-                var polyline = L.L.Routing.control([latLngAwal, latLngTujuan], {
-                    color: 'blue',
-                    weight: 3
-                }).addTo(map);
-            }
-        });
-
-        // Setelah selesai loop, zoom sekali ke semua marker
-        if (markersData.length > 0) {
-            map.fitBounds(markerGroup.getBounds().pad(0.1)); // pad(0.1) memberi sedikit ruang di pinggir
-        }
-    </script> -->
-
-    <!-- LAMA -->
-    <!-- <script>
-        // Initialize the map
-        var map = L.map('mapid').setView([-2.5, 118], 5);
-
-        // Ambil data dari PHP ke JS
-        var markers = <?= json_encode($markers) ?>;
-
-        // Tambah layer tile OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Group untuk auto-zoom semua marker
-        var markerGroup = L.featureGroup().addTo(map);
-
-        // LAMA
-        markers.forEach(function(item) {
-            if (item.gps) {
-                var coords = item.gps.split(",");
-                var lat = parseFloat(coords[0].trim());
-                var lon = parseFloat(coords[1].trim());
-
-                var popupContent = `
-            <b>Sekolah:</b> ${item.sekolah}<br>
-            <b>Barang:</b> ${item.barang}<br>
-            <b>Jumlah:</b> ${item.jumlah}<br>
-        `;
-                var marker = L.marker([lat, lon]).bindPopup(popupContent);
-                marker.addTo(markerGroup);
-
-                // Routing tanpa auto-zoom
-                L.Routing.control({
-                    waypoints: [
-                        L.latLng(<?= $lokasi_kantor ?>), // Kantor
-                        L.latLng(lat, lon) // Sekolah tujuan
-                    ],
-                    routeWhileDragging: true,
-                    show: false,
-                    addWaypoints: false,
-                    draggableWaypoints: false,
-                    fitSelectedRoutes: false, // ❌ jangan auto zoom
-                    createMarker: function() {
-                        return null; // Tidak menampilkan marker default
-                    }
-                }).addTo(map);
-            }
-        });
-
-        // ✅ Setelah selesai loop, zoom sekali ke semua marker
-        if (markers.length > 0) {
-            map.fitBounds(markerGroup.getBounds());
-        }
-    </script> -->
-
     <!-- endbuild -->
 
     <!-- Vendors JS -->

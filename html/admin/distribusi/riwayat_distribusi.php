@@ -237,68 +237,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
 
                                 </div>
                             </div>
-                            <!-- <div class="col-6 h-100">
-                                <div class="card overflow-hidden h-100">
-                                    <div class="card-header bg-transparent border-0 pt-4 pb-0 sticky-top bg-white">
-                                        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
-                                            <h4 class="card-title text-warning mb-0 fw-bold">Data Distribusi</h4>
-                                            <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
-                                                <button class="btn btn-outline-warning w-100" type="button" onclick="cetakLaporan()">
-                                                    <span class="icon-base ri ri-printer-line icon-16px me-1_5"></span>Cetak
-                                                </button>
-                                                <button class="btn btn-outline-warning w-100 " type="button" data-bs-toggle="modal" data-bs-target="#ModalFilterData">
-                                                    <span class="icon-base ri ri-filter-line icon-16px me-1_5"></span>Filter
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <hr class="mt-3 mb-3">
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="table-responsive overflow-auto" style="max-height: 500px;">
-                                            <table class="table table-sm table-bordered align-middle mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Sekolah Tujuan</th>
-                                                        <th>Jumlah</th>
-                                                        <th>Tanggal</th>
-                                                        <th>Jam</th>
-                                                        <th>Lokasi</th>
-                                                        <th>Foto</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php
-                                                    if (mysqli_num_rows($result) > 0) {
-                                                        while ($row = mysqli_fetch_assoc($result)) {
-                                                            // $status_badge = $row['status'] == '1' ? 'bg-label-success' : 'bg-label-danger';
-                                                    ?>
-
-                                                            <tr>
-                                                                <td><?php echo $row['id_distribusi']; ?></td>
-                                                                <td><?php echo $row['sekolah_tujuan']; ?></td>
-                                                                <td><?php echo $row['jumlah']; ?></td>
-                                                                <td><?php echo $row['tanggal']; ?></td>
-                                                                <td><?php echo $row['jam']; ?></td>
-                                                                <td><?php echo $row['lokasi_gps']; ?></td>
-                                                                <td>
-                                                                    <img src="../../../uploads/<?php echo $row['foto']; ?>" alt="Foto"
-                                                                        style="width:36px; height:36px; object-fit:cover;" class="rounded">
-                                                                </td>
-                                                            </tr>
-                                                    <?php
-                                                        }
-                                                    } else {
-                                                        echo "<tr><td colspan='7' class='text-center'>Data tidak ditemukan</td></tr>";
-                                                    }
-                                                    ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div> -->
+                            
                         </div>
                         <!-- Modal Filter Data -->
                         <div class="modal fade" id="ModalFilterData" tabindex="-1" aria-hidden="true">

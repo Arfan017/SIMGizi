@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result) {
         echo json_encode(['status' => 'success']);
+        sendNotification($conn, $id_distribusi, $tanggal, $jam, $jumlah_diterima, $catatan);
     } else {
         echo json_encode([
             'status' => 'error',

@@ -10,7 +10,6 @@ include '../../../php/config.php';
 
 $id_sekolah = $_SESSION['id_asal_sekolah'];
 
-// Query to get account data
 $query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
             JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users 
             JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
