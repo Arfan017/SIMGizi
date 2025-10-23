@@ -38,11 +38,11 @@ try {
     }
     $stmt_update->close();
 
-    $foto_name = '';
+    $nama_foto = '';
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
         $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
-        $foto_name = 'distribusi_' . time() . '.' . $ext;
-        $target = '../../uploads/' . $foto_name;
+        $nama_foto = 'distribusi_' . time() . '.' . $ext;
+        $target = '../../uploads/' . $nama_foto;
         if (!move_uploaded_file($_FILES['foto']['tmp_name'], $target)) {
             echo json_encode([
                 'status' => 'error',
@@ -76,75 +76,3 @@ try {
 }
 
 $conn->close();
-
-// LAMA
-// // if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-// $sekolah = $_POST['sekolah'] ?? '';
-// $jumlah = $_POST['jumlah'] ?? '';
-// $tanggal = $_POST['tanggal'] ?? '';
-// $jam = $_POST['jam'] ?? '';
-// $lokasi = $_POST['lokasi'] ?? '';
-// $catatan = $_POST['catatan'] ?? 'catatan';
-// $nama_barang = $_POST['nama_barang'] ?? '';
-// $id_petugas_distribusi = $_POST['id_petugas_distribusi'] ?? '';
-
-// if (!$sekolah || !$jumlah || !$tanggal || !$jam || !$lokasi || !$catatan || !$nama_barang || !$id_petugas_distribusi) {
-//     echo json_encode([
-//         'status' => 'error',
-//         'message' => 'Semua field wajib diisi!'
-//     ]);
-//     exit;
-// }
-
-// // Proses upload foto
-// $foto_name = '';
-// if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
-//     $ext = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
-//     $foto_name = 'distribusi_' . time() . '.' . $ext;
-//     $target = '../../uploads/' . $foto_name;
-//     if (!move_uploaded_file($_FILES['foto']['tmp_name'], $target)) {
-//         echo json_encode([
-//             'status' => 'error',
-//             'message' => 'Gagal upload foto!'
-//         ]);
-//         exit;
-//     }
-// } else {
-//     echo json_encode([
-//         'status' => 'error',
-//         'message' => 'Foto wajib diupload!'
-//     ]);
-//     exit;
-// }
-
-// // Simpan ke database
-// $query = mysqli_query($conn, "INSERT INTO tb_distribusi (id_petugas_distribusi, tanggal, jam,  nama_barang, jumlah, id_sekolah_tujuan, foto, lokasi_gps) VALUES
-//                                                         ('$id_petugas_distribusi', '$tanggal', '$jam', '$nama_barang', '$jumlah', '$sekolah',  '$foto_name', '$lokasi')");
-// if ($query) {
-//     // Ambil data distribusi terakhir yang baru diinput
-//     $id_distribusi = mysqli_insert_id($conn);
-//     $get = mysqli_query($conn, "SELECT d.*, s.nama_sekolah 
-//         FROM tb_distribusi d 
-//         JOIN tb_sekolah s ON d.id_sekolah_tujuan = s.id_sekolah 
-//         WHERE d.id_distribusi = '$id_distribusi' LIMIT 1");
-//     $data = mysqli_fetch_assoc($get);
-
-//     echo json_encode([
-//         'status' => 'success',
-//         'data' => [
-//             'id' => $data['id_distribusi'],
-//             'sekolah' => $data['nama_sekolah'],
-//             'jumlah' => $data['jumlah'],
-//             'tanggal' => $data['tanggal'],
-//             'jam' => $data['jam'],
-//             'lokasi' => $data['lokasi_gps'],
-//             'foto' => $data['foto'],
-//             'nama_barang' => $data['nama_barang']
-//         ]
-//     ]);
-// } else {
-//     echo json_encode([
-//         'status' => 'error',
-//         'message' => 'Gagal menyimpan data: ' . mysqli_error($conn)
-//     ]);
-// }

@@ -1,8 +1,9 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziDistribusi');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
     header('Location: ../../../index.php');
     exit();
 }
@@ -104,6 +105,12 @@ $result = mysqli_query($conn, $query);
                         </a>
                     </li>
                     <li class="menu-item">
+                        <a href="input_bahan_makanan.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-inbox-line"></i>
+                            <div data-i18n="Basic">Input Bahan Makanan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
                         <a href="input_stok_harian.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-inbox-archive-line"></i>
                             <div data-i18n="Basic">Input Porsi harian</div>
@@ -119,6 +126,12 @@ $result = mysqli_query($conn, $query);
                         <a href="data_distribusi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-table-line"></i>
                             <div data-i18n="Basic">Data Distribusi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="evaluasi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-file-check-line"></i>
+                            <div data-i18n="Basic">Evaluasi</div>
                         </a>
                     </li>
                     <li class="menu-item">
@@ -206,6 +219,75 @@ $result = mysqli_query($conn, $query);
                                         <!-- <hr class="mt-0"> -->
                                     </div>
                                     <div class="card-body">
+                                        <form id="formMenuStokHarian" method="POST">
+
+                                            <div class="mb-4">
+                                                <label for="tanggal_stok" class="form-label fs-5 fw-semibold">Tanggal</label>
+                                                <input type="date" class="form-control form-control-lg" id="tanggal_stok" name="tanggal_stok" required>
+                                            </div>
+
+                                            <hr class="my-4">
+
+                                            <h5 class="mb-3 fw-semibold">Pilih Menu Hari Ini</h5>
+                                            <div class="p-3 border rounded">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="menu_kh" class="form-label"><span class="text-danger">*</span> Karbohidrat (KH)</label>
+                                                            <select class="form-select" id="menu_kh" name="menu_kh" required>
+                                                                <option value="">Memuat...</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="menu_protein1" class="form-label"><span class="text-danger">*</span> Protein 1</label>
+                                                            <select class="form-select" id="menu_protein1" name="menu_protein1" required>
+                                                                <option value="">Memuat...</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="menu_protein2" class="form-label">Protein 2 <small class="text-muted">(Opsional)</small></label>
+                                                            <select class="form-select" id="menu_protein2" name="menu_protein2">
+                                                                <option value="">- Pilih Protein 2 -</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label for="menu_sayur" class="form-label"><span class="text-danger">*</span> Sayur</label>
+                                                            <select class="form-select" id="menu_sayur" name="menu_sayur" required>
+                                                                <option value="">Memuat...</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="menu_buah" class="form-label">Buah <small class="text-muted">(Opsional)</small></label>
+                                                            <select class="form-select" id="menu_buah" name="menu_buah">
+                                                                <option value="">- Pilih Buah -</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="menu_tambahan" class="form-label">Tambahan <small class="text-muted">(Opsional)</small></label>
+                                                            <input type="text" class="form-control" id="menu_tambahan" name="menu_tambahan" placeholder="Contoh: Susu 125ml">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <hr class="my-4">
+
+                                            <div class="mb-4">
+                                                <label for="jumlah_total" class="form-label fs-5 fw-semibold"><span class="text-danger">*</span> Jumlah Total Porsi</label>
+                                                <input type="number" class="form-control form-control-lg" id="jumlah_total" name="jumlah_total" min="1" required placeholder="Contoh: 2000">
+                                            </div>
+
+                                            <button type="submit" class="btn btn-warning w-100 btn-lg">Simpan Menu & Stok</button>
+                                        </form>
+                                    </div>
+                                    <!-- <div class="card-body">
                                         <div class="card-body">
                                             <form id="formStokHarian" action="../../../php/distribusi/crud_stok.php" method="POST">
                                                 <div class="mb-3">
@@ -219,7 +301,7 @@ $result = mysqli_query($conn, $query);
                                                 <button type="submit" class="btn btn-outline-warning w-100">Simpan Stok</button>
                                             </form>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                             <!-- / Form Input -->
@@ -265,24 +347,80 @@ $result = mysqli_query($conn, $query);
     <script src="../../../assets/vendor/js/menu.js"></script>
 
     <script>
-        $('#formStokHarian').on('submit', function(e) {
-            e.preventDefault();
-            $.ajax({
-                url: '../../../php/distribusi/crud_stok.php',
-                type: 'POST',
-                data: $(this).serialize(),
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        alert('Stok harian berhasil disimpan!');
-                        $('#formStokHarian')[0].reset();
-                    } else {
-                        alert('Gagal: ' + response.message);
-                    }
-                },
-                error: function() {
-                    alert('Terjadi kesalahan. Gagal menghubungi server.');
+        $(document).ready(function() {
+            // Fungsi untuk mengisi dropdown
+            function populateDropdown(selector, items, placeholder) {
+                var dropdown = $(selector);
+                dropdown.empty(); // Kosongkan dulu
+                if (placeholder) {
+                    dropdown.append($('<option>', {
+                        value: '',
+                        text: placeholder
+                    }));
                 }
+                if (items && items.length > 0) {
+                    $.each(items, function(i, item) {
+                        dropdown.append($('<option>', {
+                            value: item.id,
+                            text: item.nama
+                        }));
+                    });
+                } else {
+                    dropdown.append($('<option>', {
+                        value: '',
+                        text: 'Tidak ada pilihan'
+                    }));
+                    if (selector !== '#menu_protein2' && selector !== '#menu_buah') { // Kecuali opsional
+                        dropdown.prop('required', false); // Nonaktifkan required jika tidak ada pilihan
+                    }
+                }
+            }
+
+            // Ambil data bahan makanan saat halaman dimuat
+            $.getJSON('../../../php/distribusi/api_get_bahan_makanan.php', function(response) {
+                if (response.status === 'success' && response.options) {
+                    populateDropdown('#menu_kh', response.options.KH, '- Pilih KH -');
+                    populateDropdown('#menu_protein1', response.options.Protein, '- Pilih Protein 1 -');
+                    populateDropdown('#menu_protein2', response.options.Protein, '- Pilih Protein 2 (Opsional) -');
+                    populateDropdown('#menu_sayur', response.options.Sayur, '- Pilih Sayur -');
+                    populateDropdown('#menu_buah', response.options.Buah, '- Pilih Buah (Opsional) -');
+                } else {
+                    alert('Gagal memuat pilihan menu: ' + (response.message || 'Format data salah'));
+                    // Nonaktifkan form atau tampilkan pesan error
+                }
+            }).fail(function() {
+                alert('Gagal menghubungi server untuk mengambil pilihan menu.');
+                // Nonaktifkan form atau tampilkan pesan error
+            });
+
+            // Handler untuk submit form
+            $('#formMenuStokHarian').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: '../../../php/distribusi/api_save_menu_stok.php', // Panggil API baru
+                    type: 'POST',
+                    data: $(this).serialize(), // Kirim semua data form
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert(response.message || 'Menu dan Stok berhasil disimpan!');
+                            $('#formMenuStokHarian')[0].reset();
+                            // Reset dropdowns ke placeholder awal
+                            $('#menu_kh').val('');
+                            $('#menu_protein1').val('');
+                            $('#menu_protein2').val('');
+                            $('#menu_sayur').val('');
+                            $('#menu_buah').val('');
+                        } else {
+                            alert('Gagal: ' + (response.message || 'Terjadi kesalahan.'));
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error("AJAX Error:", textStatus, errorThrown);
+                        console.error("Response Text:", jqXHR.responseText);
+                        alert('Terjadi kesalahan saat menyimpan. Gagal menghubungi server.');
+                    }
+                });
             });
         });
     </script>

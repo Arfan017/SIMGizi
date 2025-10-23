@@ -1,8 +1,9 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziDistribusi');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
     header('Location: ../../../index.php');
     exit();
 }
@@ -81,6 +82,12 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         </a>
                     </li>
                     <li class="menu-item">
+                        <a href="input_bahan_makanan.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-inbox-line"></i>
+                            <div data-i18n="Basic">Input Bahan Makanan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
                         <a href="input_stok_harian.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-inbox-archive-line"></i>
                             <div data-i18n="Basic">Input Porsi harian</div>
@@ -96,6 +103,12 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         <a href="data_distribusi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-table-line"></i>
                             <div data-i18n="Basic">Data Distribusi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="evaluasi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-file-check-line"></i>
+                            <div data-i18n="Basic">Evaluasi</div>
                         </a>
                     </li>
                     <li class="menu-item">
@@ -534,7 +547,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
             });
 
         });
-
     </script>
 
     <!-- endbuild -->

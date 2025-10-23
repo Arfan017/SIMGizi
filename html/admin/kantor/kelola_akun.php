@@ -1,8 +1,9 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziKantor');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_kantor') {
     header('Location: ../../../index.php');
     exit();
 }
@@ -195,21 +196,21 @@ $result = mysqli_query($conn, $query);
                                         <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
                                             <h4 class="card-title text-info mb-0 fw-bold">Kelola Akun</h4>
                                             <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
-                                                <button class="btn btn-outline-info w-60" type="button" data-bs-toggle="modal" data-bs-target="#ModalTambahAkun">
+                                                <button class="btn btn-outline-info w-100" type="button" data-bs-toggle="modal" data-bs-target="#ModalTambahAkun">
                                                     <span class="icon-base ri ri-user-add-line icon-16px me-1_5"></span>Tambah Akun
                                                 </button>
-                                                <div class="input-group input-group-sm">
+                                                <!-- <div class="input-group input-group-sm">
                                                     <span class="input-group-text bg-white border-end-0">
                                                         <i class="icon-base ri ri-search-line text-muted"></i>
                                                     </span>
                                                     <input type="text" class="form-control border-start-0" placeholder="Cari laporan evaluasi...">
-                                                </div>
+                                                </div> -->
                                             </div>
                                         </div>
                                         <div id="alertContainer"></div>
                                         <hr class="mt-3 mb-3">
                                     </div>
-                                    <div class="table-responsive overflow-auto" style="height: calc(570px - 90px);">
+                                    <div class="table-responsive overflow-auto flex-grow-1" style="height: calc(570px - 90px);">
                                         <table class="table table-sm table-striped">
                                             <thead>
                                                 <tr>

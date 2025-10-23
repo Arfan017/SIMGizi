@@ -1,6 +1,12 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziKantor');
+session_start();
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_kantor') {
+    header('Location: ../../../index.php');
+    exit();
+}
 include '../../../php/config.php';
 
 // Query to get evaluation report data

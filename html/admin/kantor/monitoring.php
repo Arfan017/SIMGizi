@@ -1,8 +1,9 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziKantor');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_kantor') {
     header('Location: ../../../index.php');
     exit();
 }

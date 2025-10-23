@@ -1,7 +1,8 @@
 <!doctype html>
 <?php
+session_name('SIMGiziDistribusi');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
     header('Location: ../../../index.php');
     exit();
 }
@@ -80,6 +81,12 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         </a>
                     </li>
                     <li class="menu-item">
+                        <a href="input_bahan_makanan.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-inbox-line"></i>
+                            <div data-i18n="Basic">Input Bahan Makanan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
                         <a href="input_stok_harian.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-inbox-archive-line"></i>
                             <div data-i18n="Basic">Input Porsi harian</div>
@@ -95,6 +102,12 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         <a href="data_distribusi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-table-line"></i>
                             <div data-i18n="Basic">Data Distribusi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="evaluasi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-file-check-line"></i>
+                            <div data-i18n="Basic">Evaluasi</div>
                         </a>
                     </li>
                     <li class="menu-item">
@@ -169,7 +182,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                             <nav aria-label="breadcrumb">
                                 <ol class="breadcrumb mb-0">
                                     <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
-                                    <li class="breadcrumb-item active" aria-current="page">Data Distribusi</li>
+                                    <li class="breadcrumb-item active" aria-current="page">Riwayat Distribusi</li>
                                 </ol>
                             </nav>
                         </div>
@@ -179,7 +192,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                 <div class="card overflow-hidden h-100">
                                     <div class="card-header bg-transparent border-0 pt-4 pb-0 sticky-top bg-white">
                                         <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap">
-                                            <h4 class="card-title text-warning mb-0 fw-bold">Data Distribusi</h4>
+                                            <h4 class="card-title text-warning mb-0 fw-bold">Riwayat Distribusi</h4>
                                             <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
                                                 <button class="btn btn-outline-warning w-100" type="button" onclick="cetakLaporan()">
                                                     <span class="icon-base ri ri-printer-line icon-16px me-1_5"></span>Cetak
@@ -234,10 +247,9 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                             </table>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
-                            
+
                         </div>
                         <!-- Modal Filter Data -->
                         <div class="modal fade" id="ModalFilterData" tabindex="-1" aria-hidden="true">

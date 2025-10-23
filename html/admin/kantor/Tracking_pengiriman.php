@@ -1,8 +1,9 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziKantor');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_kantor') {
     header('Location: ../../../index.php');
     exit();
 }
@@ -15,8 +16,10 @@ $query = "SELECT
             tb_distribusi.jam_berangkat,
             tb_distribusi.jam_tiba,
             tb_distribusi.gps_awal,
+            tb_distribusi.status_pengiriman,
             tb_sekolah.lokasi_gps, 
-            tb_sekolah.nama_sekolah 
+            tb_sekolah.nama_sekolah,
+            tb_distribusi.lokasi_terkini 
           FROM tb_distribusi
           JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 
           WHERE tb_distribusi.status_pengiriman IN ('0', '1', '2') AND tb_distribusi.tanggal = CURDATE()";
@@ -38,9 +41,11 @@ while ($row = mysqli_fetch_assoc($result)) {
             'jumlah'         => $row['jumlah'],
             'sekolah'        => $row['nama_sekolah'],
             'gps_tujuan'     => $row['lokasi_gps'],
+            'status'         => $row['status_pengiriman'],
             'gps_awal'       => $row['gps_awal'],
             'jam_berangkat'  => $row['jam_berangkat'],
-            'jam_tiba'       => $row['jam_tiba']
+            'jam_tiba'       => $row['jam_tiba'],
+            'lokasi_terkini' => $row['lokasi_terkini']
         ];
     }
 }
@@ -226,7 +231,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                             <div class="col-lg-8 h-100">
                                 <div class="card h-100">
                                     <div class="card-header">
-                                        <h5 class="card-title mb-0">Peta Lokasi Pengiriman</h5>
+                                        <h5 class="card-title mb-0 text-info">Peta Lokasi Pengiriman</h5>
                                     </div>
                                     <div class="card-body p-0">
                                         <div class="map h-100" id="mapid" style="min-height: 600px;"></div>
@@ -236,9 +241,9 @@ while ($row = mysqli_fetch_assoc($result)) {
                             <div class="col-lg-4 h-100">
                                 <div class="card h-100">
                                     <div class="card-header">
-                                        <h5 class="card-title mb-0">Ringkasan Pengiriman Hari Ini</h5>
+                                        <h5 class="card-title mb-0 text-info">Ringkasan Pengiriman Hari Ini</h5>
                                     </div>
-                                    <div class="table-responsive ">
+                                    <div class="table-responsive overflow-auto flex-grow-1" style="height: calc(570px - 90px);">
                                         <table class="table table-striped">
                                             <thead>
                                                 <tr>
@@ -294,106 +299,119 @@ while ($row = mysqli_fetch_assoc($result)) {
     <script src="../../../assets/vendor/js/menu.js"></script>
 
     <script>
-        // Inisialisasi peta
         var map = L.map('mapid').setView([-2.5, 118], 5);
-
-        // Ambil data dari PHP ke JS
         var markersData = <?= json_encode($markers) ?>;
-
-        // Tambah layer tile OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Group untuk auto-zoom semua marker
         var markerGroup = L.featureGroup().addTo(map);
+        var liveMarkers = {};
 
-        // Variabel untuk nomor urut tabel
-        var tableCounter = 1;
+        var kurirIcon = L.icon({
+            iconUrl: '../../../assets/img/icons/pin.svg',
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+        });
+        var selesaiIcon = L.icon({
+            iconUrl: '../../../assets/img/icons/pin_check.svg',
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+        });
 
-        // Loop semua data pengiriman
         markersData.forEach(function(item) {
             var latLngAwal, latLngTujuan;
 
-            if (item.gps_awal) {
+            if (item.status == '2') {
+                if (item.gps_tujuan) {
+                    var coordsTujuan = item.gps_tujuan.split(",");
+                    latLngTujuan = L.latLng(parseFloat(coordsTujuan[0].trim()), parseFloat(coordsTujuan[1].trim()));
 
-                var coordsAwal = item.gps_awal.split(",");
-                var latAwal = parseFloat(coordsAwal[0].trim());
-                var lonAwal = parseFloat(coordsAwal[1].trim());
-                latLngAwal = L.latLng(latAwal, lonAwal);
+                    var popupSelesai = `
+                    <b>Status: Selesai</b><br>
+                    <b>Sekolah:</b> ${item.sekolah}<br>
+                    <b>Jam Tiba:</b> ${item.jam_tiba || 'N/A'}
+                `;
+                    L.marker(latLngTujuan, {
+                        icon: selesaiIcon
+                    }).bindPopup(popupSelesai).addTo(markerGroup);
+                }
+            } else {
+                if (item.gps_tujuan) {
+                    var coordsTujuan = item.gps_tujuan.split(",");
+                    latLngTujuan = L.latLng(parseFloat(coordsTujuan[0].trim()), parseFloat(coordsTujuan[1].trim()));
+                    var popupTujuan = `<b>Tujuan: ${item.sekolah}</b>`;
+                    L.marker(latLngTujuan).bindPopup(popupTujuan).addTo(markerGroup);
+                }
 
-                var popupAwal = `
-                <b>Status: Keberangkatan</b><br>
-                <b>Jam Berangkat:</b> ${item.jam_berangkat || 'N/A'}<br>
-                <hr class='my-1'>
-                <b>Tujuan:</b> ${item.sekolah}<br>
-                <b>Barang:</b> ${item.barang} (${item.jumlah})
-            `;
+                var posisiAwalKurir = item.lokasi_terkini || item.gps_awal;
+                if (posisiAwalKurir) {
+                    var coordsAwal = posisiAwalKurir.split(",");
+                    latLngAwal = L.latLng(parseFloat(coordsAwal[0].trim()), parseFloat(coordsAwal[1].trim()));
+                    var popupKurir = `<b>Status: Dalam Perjalanan</b><br><b>Menuju:</b> ${item.sekolah}`;
+                    var markerKurir = L.marker(latLngAwal, {
+                        icon: kurirIcon
+                    }).bindPopup(popupKurir).addTo(markerGroup);
+                    liveMarkers[item.id] = markerKurir;
+                }
 
-                var markerAwal = L.marker(latLngAwal).bindPopup(popupAwal);
-                markerAwal.addTo(markerGroup);
-
-            }
-            if (item.gps_tujuan) {
-
-                var coordsTujuan = item.gps_tujuan.split(",");
-                var latTujuan = parseFloat(coordsTujuan[0].trim());
-                var lonTujuan = parseFloat(coordsTujuan[1].trim());
-                latLngTujuan = L.latLng(latTujuan, lonTujuan);
-
-                var statusTiba = item.jam_tiba ? `<b>Jam Tiba:</b> ${item.jam_tiba}` : '<b>Status:</b> Masih dalam perjalanan';
-
-                var popupTujuan = `
-                <b>Tujuan: ${item.sekolah}</b><br>
-                ${statusTiba}<br>
-                <hr class='my-1'>
-                <b>Barang:</b> ${item.barang} (${item.jumlah})
-            `;
-
-                var markerTujuan = L.marker(latLngTujuan).bindPopup(popupTujuan);
-                markerTujuan.addTo(markerGroup);
-
-            }
-            if (latLngAwal && latLngTujuan) {
-                L.Routing.control({
-                    waypoints: [latLngAwal, latLngTujuan],
-                    show: false,
-                    addWaypoints: false,
-                    draggableWaypoints: false,
-                    fitSelectedRoutes: false,
-                    createMarker: function() {
-                        return null;
-                    },
-                    lineOptions: {
-                        styles: [{
-                            color: 'blue',
-                            opacity: 0.7,
-                            weight: 5
-                        }]
-                    }
-                }).addTo(map);
+                if (latLngAwal && latLngTujuan) {
+                    L.Routing.control({
+                        waypoints: [latLngAwal, latLngTujuan],
+                        show: false,
+                        addWaypoints: false,
+                        createMarker: function() {
+                            return null;
+                        },
+                        lineOptions: {
+                            styles: [{
+                                color: 'blue',
+                                opacity: 0.7,
+                                weight: 5
+                            }]
+                        }
+                    }).addTo(map);
+                }
             }
 
             var jamBerangkat = item.jam_berangkat ? item.jam_berangkat.substring(0, 5) : '-';
             var jamTiba = item.jam_tiba ? item.jam_tiba.substring(0, 5) : '-';
-
             var tableRow = `
             <tr>
                 <td>${item.sekolah}</td>
                 <td><span class="badge bg-label-info">${jamBerangkat}</span></td>
-                <td><span class="badge bg-label-success">${jamTiba}</span></td>
+                <td><span class="badge ${item.status == '2' ? 'bg-label-success' : 'bg-label-secondary'}">${jamTiba}</span></td>
             </tr>
         `;
-
             $('#delivery-table-body').append(tableRow);
-
-            tableCounter++;
         });
+
+        function perbaruiLokasiKurir() {
+            $.getJSON('../../../php/api/api_get_lokasi_terkini.php', function(data) {
+                console.log("Mendapat pembaruan lokasi:", data);
+                data.forEach(function(kurir) {
+                    var markerToMove = liveMarkers[kurir.id_distribusi];
+                    if (markerToMove && kurir.lokasi_terkini) {
+                        var coords = kurir.lokasi_terkini.split(",");
+                        var newLatLng = L.latLng(parseFloat(coords[0].trim()), parseFloat(coords[1].trim()));
+                        markerToMove.setLatLng(newLatLng);
+                    }
+                });
+            }).fail(function() {
+                console.error("Gagal mengambil data lokasi terkini.");
+            });
+        }
+
+        setInterval(perbaruiLokasiKurir, 10000);
 
         setTimeout(function() {
             if (markersData.length > 0 && markerGroup.getLayers().length > 0) {
-                map.invalidateSize(); 
+                map.invalidateSize();
                 map.fitBounds(markerGroup.getBounds().pad(0.1));
+            } else {
+                map.invalidateSize();
             }
         }, 500);
     </script>

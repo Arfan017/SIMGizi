@@ -1,8 +1,9 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziSekolah');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') {
     header('Location: ../../../index.php');
     exit();
 }
@@ -64,7 +65,7 @@ $result = mysqli_query($conn, $query);
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
             <!-- Menu -->
-            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+            <aside id="layout-menu" class="layout-menu menu-vertical menu">
                 <div class="app-brand demo">
                     <a href="index.php" class="app-brand-link">
                         <i class="icon-menu icon-base ri ri-school-line icon-32px bg-success"></i>
@@ -91,11 +92,17 @@ $result = mysqli_query($conn, $query);
                         </a>
                     </li>
 
-                    <!-- Icons -->
                     <li class="menu-item">
                         <a href="konfirmasi_distribusi.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-file-check-line"></i>
                             <div data-i18n="Icons">Konfirmasi Penerimaan</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="analisis_gabungan.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-bar-chart-line"></i>
+                            <div data-i18n="Icons">Data Grafik</div>
                         </a>
                     </li>
                 </ul>

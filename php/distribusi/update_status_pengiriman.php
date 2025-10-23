@@ -56,7 +56,7 @@ if ($query) {
     echo json_encode(['status' => 'success', 'message' => 'Status berhasil diperbarui.']);
 } else {
     // Jika $query null (status tidak valid) atau query gagal
-    if(mysqli_error($conn)) {
+    if (mysqli_error($conn)) {
         echo json_encode(['status' => 'error', 'message' => mysqli_error($conn)]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Aksi tidak valid!']);

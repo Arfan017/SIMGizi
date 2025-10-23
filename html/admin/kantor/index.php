@@ -1,8 +1,9 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziKantor');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_kantor') {
     header('Location: ../../../index.php');
     exit();
 }
@@ -28,7 +29,10 @@ $q_belum_terkirim = mysqli_query($conn, "SELECT COUNT(*) AS belum FROM tb_distri
 $belum_terkirim = mysqli_fetch_assoc($q_belum_terkirim)['belum'];
 
 // Query to get evaluation report data
-$q_evaluasi = "SELECT * FROM tb_distribusi WHERE status_evaluasi = '0' AND status_konfirmasi = '1'";
+$q_evaluasi = "SELECT tb_distribusi.*, tb_sekolah.nama_sekolah AS sekolah_tujuan, tb_konfirmasi_distribusi.gambar FROM tb_distribusi 
+          JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
+          JOIN tb_konfirmasi_distribusi ON tb_distribusi.id_distribusi = tb_konfirmasi_distribusi.id_distribusi
+          WHERE status_evaluasi = '0' AND status_konfirmasi = '1' ORDER BY tanggal DESC";
 $data_evaluasi = mysqli_query($conn, $q_evaluasi);
 ?>
 
@@ -271,16 +275,15 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                                                 <?php
                                                 if (mysqli_num_rows($data_evaluasi) > 0) {
                                                     while ($data = mysqli_fetch_assoc($data_evaluasi)) {
-                                                        // Display each evaluation report
                                                 ?>
                                                         <div class="col-12">
                                                             <div class="card p-3 shadow-sm border">
                                                                 <div class="d-flex align-items-center mb-2">
-                                                                    <img src="../../../assets/img/avatars/1.png" alt="Petugas" class="rounded"
+                                                                    <img src="../../../uploads/<?= $data["gambar"] ?>" alt="Petugas" class="rounded"
                                                                         style="width:48px; height:48px; object-fit:cover;">
                                                                     <div class="ms-2">
-                                                                        <div class="fw-semibold">SDN 1</div>
-                                                                        <small class="text-muted">tanggal: 2025-07-23</small>
+                                                                        <div class="fw-semibold"><?= $data["sekolah_tujuan"] ?></div>
+                                                                        <small class="text-muted">tanggal: <?= $data["tanggal"] ?></small>
                                                                     </div>
                                                                 </div>
                                                                 <div class="mb-2">

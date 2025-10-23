@@ -1,8 +1,9 @@
 <!doctype html>
 
 <?php
+session_name('SIMGiziKantor');
 session_start();
-if (!isset($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_kantor') {
     header('Location: ../../../index.php');
     exit();
 }
@@ -314,6 +315,7 @@ $result_sekolah2 = mysqli_query($conn, $q_sekolah2);
                                                                                 </div>
                                                                                 <form class="formEvaluasi" method="POST" action="../../../php/kantor/proses_evaluasi.php">
                                                                                     <input type="hidden" name="id_distribusi" value="<?= $data["id_distribusi"] ?>">
+                                                                                    <input type="hidden" name="id_admin" value="<?= $_SESSION["user_id"] ?>">
                                                                                     <div class="row g-2 align-items-center">
                                                                                         <div class="col-md-4">
                                                                                             <select class="form-select form-select-sm" name="status_distribusi">
@@ -346,7 +348,6 @@ $result_sekolah2 = mysqli_query($conn, $q_sekolah2);
                                                 </div>
                                             </div>
                                         </div>
-
                                         <div class="tab-pane fade" id="navs-justified-riwayat-evaluasi" role="tabpanel">
                                             <div class="d-flex align-items-center justify-content-end flex-nowrap gap-2">
                                                 <div class="form-floating form-floating-outline flex-grow-1">

@@ -1,5 +1,10 @@
 <?php
+session_name('SIMGiziSekolah');
 session_start();
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') {
+    header('Location: ../../../index.php');
+    exit();
+}
 require '../../dompdf/vendor/autoload.php'; // include autoloader
 require '../config.php'; // koneksi database
 
