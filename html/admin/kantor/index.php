@@ -76,6 +76,26 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
 </head>
 
 <body>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
+        <div id="evalToastSuccess" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="ri-checkbox-circle-line me-1"></i> Evaluasi berhasil disimpan!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div id="evalToastError" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="ri-error-warning-line me-1"></i> <span id="evalErrorMsg"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -291,6 +311,7 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                                                                 <form class="formEvaluasi" method="POST" action="../../../php/kantor/proses_evaluasi.php">
                                                                     <div class="row g-2 align-items-center">
                                                                         <input type="hidden" name="id_distribusi" value="<?= $data["id_distribusi"] ?>">
+                                                                        <input type="hidden" name="id_admin" value="<?= $_SESSION["user_id"] ?>">
                                                                         <div class="col-md-3">
                                                                             <select class="form-select form-select-sm" id="status" name="status_distribusi">
                                                                                 <option value="">Status Distribusi</option>
@@ -422,6 +443,54 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
     <script src="../../../assets/vendor/libs/node-waves/node-waves.js"></script>
     <script src="../../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="../../../assets/vendor/js/menu.js"></script>
+    <script>
+        $(document).on('submit', '.formEvaluasi', function(e) {
+            e.preventDefault();
+            var form = $(this);
+
+            // Validasi form
+            var status = form.find('[name="status_distribusi"]').val();
+            var catatan = form.find('[name="catatan"]').val();
+
+            if (!status) {
+                $('#evalErrorMsg').text('Status distribusi wajib dipilih!');
+                const toast = new bootstrap.Toast(document.getElementById('evalToastError'));
+                toast.show();
+                return;
+            }
+            if (!catatan) {
+                $('#evalErrorMsg').text('Catatan evaluasi wajib diisi!');
+                const toast = new bootstrap.Toast(document.getElementById('evalToastError'));
+                toast.show();
+                return;
+            }
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const toast = new bootstrap.Toast(document.getElementById('evalToastSuccess'));
+                        toast.show();
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1200);
+                    } else {
+                        $('#evalErrorMsg').text(response.message || 'Gagal menyimpan evaluasi!');
+                        const toast = new bootstrap.Toast(document.getElementById('evalToastError'));
+                        toast.show();
+                    }
+                },
+                error: function() {
+                    $('#evalErrorMsg').text('Tidak dapat terhubung ke server.');
+                    const toast = new bootstrap.Toast(document.getElementById('evalToastError'));
+                    toast.show();
+                }
+            });
+        });
+    </script>
 
     <!-- endbuild -->
 
