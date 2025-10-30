@@ -232,7 +232,7 @@ ob_start();
         <div class="header">
             <h2>SISTEM INFORMASI MONITORING</h2>
             <p>PEMANTAUAN MAKANAN BERGIZI</p>
-            <!-- <p><i>Alamat Kantor Pusat / Yayasan Anda, Kota, Kode Pos</i></p> -->
+            <p><i>Kencana, Jln. Yos Sudarso, wagom utara, distrik Fakfak, kabupaten fakfak</i></p>
         </div>
 
         <div class="title">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 23, 2025 at 01:01 PM
+-- Generation Time: Oct 30, 2025 at 05:36 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `simgizio_SIMGizi`
+-- Database: `db_sim_gizi`
 --
 
 DELIMITER $$
@@ -157,7 +157,8 @@ INSERT INTO `tb_bahan_makanan` (`id_bahan`, `nama_bahan`, `kategori`) VALUES
 (18, 'Pisang', 'Buah'),
 (19, 'Jeruk', 'Buah'),
 (20, 'Pepaya', 'Buah'),
-(21, 'Melon', 'Buah');
+(21, 'Melon', 'Buah'),
+(22, 'Bubur', 'KH');
 
 -- --------------------------------------------------------
 
@@ -169,6 +170,7 @@ CREATE TABLE `tb_distribusi` (
   `id_distribusi` int(11) NOT NULL,
   `id_petugas_distribusi` int(11) NOT NULL,
   `id_sekolah_tujuan` int(11) NOT NULL,
+  `id_menu` int(11) NOT NULL,
   `tanggal` date NOT NULL,
   `jam` time NOT NULL,
   `nama_barang` varchar(255) NOT NULL,
@@ -186,6 +188,14 @@ CREATE TABLE `tb_distribusi` (
   `gps_awal` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `tb_distribusi`
+--
+
+INSERT INTO `tb_distribusi` (`id_distribusi`, `id_petugas_distribusi`, `id_sekolah_tujuan`, `id_menu`, `tanggal`, `jam`, `nama_barang`, `jumlah`, `jumlah_habis`, `jumlah_kembali`, `lokasi_gps`, `lokasi_terkini`, `foto`, `status_konfirmasi`, `status_pengiriman`, `status_evaluasi`, `jam_berangkat`, `jam_tiba`, `gps_awal`) VALUES
+(1, 2, 1, 1, '2025-10-30', '22:42:00', 'Makanan', 123, 120, 3, '-2.9266725527247353, 132.29280553399715', NULL, 'distribusi_1761831781.png', '1', '2', 1, '22:43:24', '22:43:28', '-0.8887527392408906,131.2771387232936'),
+(2, 2, 1, 2, '2025-10-31', '00:38:00', 'Makanan', 200, 120, 80, '-2.9266725527247353, 132.29280553399715', NULL, 'distribusi_1761838631.png', '1', '2', 1, '00:50:51', '00:50:53', '-0.8894826,131.2772717');
+
 -- --------------------------------------------------------
 
 --
@@ -200,6 +210,14 @@ CREATE TABLE `tb_evaluasi` (
   `id_admin_kantor` int(11) NOT NULL,
   `tanggal_evaluasi` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tb_evaluasi`
+--
+
+INSERT INTO `tb_evaluasi` (`id_evaluasi`, `id_distribusi`, `catatan`, `status_distribusi`, `id_admin_kantor`, `tanggal_evaluasi`) VALUES
+(1, 1, 'catatan evaluasi', '1', 1, '2025-10-30 15:50:17'),
+(2, 2, '-', '2', 1, '2025-10-30 15:51:40');
 
 --
 -- Triggers `tb_evaluasi`
@@ -252,6 +270,14 @@ CREATE TABLE `tb_konfirmasi_distribusi` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
+-- Dumping data for table `tb_konfirmasi_distribusi`
+--
+
+INSERT INTO `tb_konfirmasi_distribusi` (`id_konfirmasi`, `id_distribusi`, `tanggal`, `jam`, `status`, `jumlah_diterima`, `jumlah_habis`, `jumlah_kembali`, `catatan`, `gambar`) VALUES
+(1, 1, '2025-10-30', '22:44:11', 'Terima', 123, 120, 3, 'catata konfirmasi', 'konfirmasi_1761831851.png'),
+(2, 2, '2025-10-31', '00:51:28', 'Terima', 200, 120, 80, 'catatan konfirmasi', 'konfirmasi_1761839488.PNG');
+
+--
 -- Triggers `tb_konfirmasi_distribusi`
 --
 DELIMITER $$
@@ -283,6 +309,14 @@ CREATE TABLE `tb_menu_harian` (
   `id_bahan_buah` int(11) NOT NULL,
   `tambahan` varchar(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tb_menu_harian`
+--
+
+INSERT INTO `tb_menu_harian` (`id_menu`, `tanggal`, `id_bahan_kh`, `id_bahan_protein1`, `id_bahan_protein2`, `id_bahan_sayur`, `id_bahan_buah`, `tambahan`) VALUES
+(1, '2025-10-30', 22, 8, 6, 16, 19, 'Susu 250ml'),
+(2, '2025-10-31', 22, 8, 6, 15, 20, 'Kerupuk');
 
 -- --------------------------------------------------------
 
@@ -334,6 +368,14 @@ CREATE TABLE `tb_stok_harian` (
   `jumlah_sisa` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `tb_stok_harian`
+--
+
+INSERT INTO `tb_stok_harian` (`id_stok`, `tanggal`, `jumlah_total`, `jumlah_sisa`) VALUES
+(1, '2025-10-30', 2000, 722),
+(2, '2025-10-31', 2000, 1800);
+
 -- --------------------------------------------------------
 
 --
@@ -356,8 +398,8 @@ CREATE TABLE `tb_users` (
 --
 
 INSERT INTO `tb_users` (`id_users`, `username`, `password`, `role`, `nama`, `id_asal_sekolah`, `no_hp`, `status`) VALUES
-(1, 'kantor', '$2y$10$gO27qQ6RKR1T6wzUHf2U4Ov2FhLfY3rTUaIgCmJfvRrYDBKDJUXxC', 'admin_kantor', 'Kantor Kencana', 17, '081247796665', 'Aktif'),
-(2, 'distribusi', '$2y$10$gO27qQ6RKR1T6wzUHf2U4Ov2FhLfY3rTUaIgCmJfvRrYDBKDJUXxC', 'admin_distribusi', 'Distirbusi Kencana', NULL, '081247796665', 'Aktif'),
+(1, 'kantor', '$2y$10$gO27qQ6RKR1T6wzUHf2U4Ov2FhLfY3rTUaIgCmJfvRrYDBKDJUXxC', 'admin_kantor', 'Kantor Kencana', 17, '08124823989', 'Aktif'),
+(2, 'distribusi', '$2y$10$gO27qQ6RKR1T6wzUHf2U4Ov2FhLfY3rTUaIgCmJfvRrYDBKDJUXxC', 'admin_distribusi', 'Distirbusi Kencana', NULL, '08124823989', 'Aktif'),
 (3, 'TK_Pembina', '$2y$10$gO27qQ6RKR1T6wzUHf2U4Ov2FhLfY3rTUaIgCmJfvRrYDBKDJUXxC', 'admin_sekolah', 'TK Pembina', 1, '081247796664', 'Aktif'),
 (4, 'TK_Kuncup_Harapan', '$2y$10$gO27qQ6RKR1T6wzUHf2U4Ov2FhLfY3rTUaIgCmJfvRrYDBKDJUXxC', 'admin_sekolah', 'TK Kuncup Harapan', 2, '6281111000002', 'Aktif'),
 (5, 'TK_ABA_1', '$2y$10$gO27qQ6RKR1T6wzUHf2U4Ov2FhLfY3rTUaIgCmJfvRrYDBKDJUXxC', 'admin_sekolah', 'TK ABA 1', 3, '6281111000003', 'Aktif'),
@@ -391,7 +433,8 @@ ALTER TABLE `tb_bahan_makanan`
 ALTER TABLE `tb_distribusi`
   ADD PRIMARY KEY (`id_distribusi`),
   ADD KEY `id_petugas_distribusi` (`id_petugas_distribusi`),
-  ADD KEY `id_sekolah` (`id_sekolah_tujuan`);
+  ADD KEY `id_sekolah` (`id_sekolah_tujuan`),
+  ADD KEY `id_menu` (`id_menu`);
 
 --
 -- Indexes for table `tb_evaluasi`
@@ -446,19 +489,19 @@ ALTER TABLE `tb_users`
 -- AUTO_INCREMENT for table `tb_bahan_makanan`
 --
 ALTER TABLE `tb_bahan_makanan`
-  MODIFY `id_bahan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id_bahan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `tb_distribusi`
 --
 ALTER TABLE `tb_distribusi`
-  MODIFY `id_distribusi` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_distribusi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `tb_evaluasi`
 --
 ALTER TABLE `tb_evaluasi`
-  MODIFY `id_evaluasi` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_evaluasi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `tb_kantor`
@@ -470,13 +513,13 @@ ALTER TABLE `tb_kantor`
 -- AUTO_INCREMENT for table `tb_konfirmasi_distribusi`
 --
 ALTER TABLE `tb_konfirmasi_distribusi`
-  MODIFY `id_konfirmasi` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_konfirmasi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `tb_menu_harian`
 --
 ALTER TABLE `tb_menu_harian`
-  MODIFY `id_menu` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_menu` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `tb_sekolah`
@@ -488,7 +531,7 @@ ALTER TABLE `tb_sekolah`
 -- AUTO_INCREMENT for table `tb_stok_harian`
 --
 ALTER TABLE `tb_stok_harian`
-  MODIFY `id_stok` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_stok` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `tb_users`
