@@ -20,9 +20,10 @@ function send_json_response($status, $dataOrMessage)
 
 try {
     // Validasi login
-    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') {
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') { // Sesuaikan dengan nama role Anda
         throw new Exception('Akses ditolak.');
     }
+    // Ambil id_sekolah dari Sesi
     $id_sekolah = $_SESSION['id_asal_sekolah'];
 
     // Tentukan Rentang Tanggal
@@ -35,67 +36,115 @@ try {
         $end_date = date('Y-m-t');
     }
 
-    // 3. Query: Tambahkan bm.kategori
+    // --- 3. QUERY SQL DIPERBARUI ---
+    // Sekarang kita JOIN tb_menu_harian (mh) dengan tb_distribusi (d)
+    // dan memfilter berdasarkan id_sekolah_tujuan dan status_konfirmasi
     $sql = "
-        SELECT bm.nama_bahan, bm.kategori, COUNT(bm.id_bahan) AS frekuensi -- Tambah kategori
+        SELECT bm.nama_bahan, bm.kategori, COUNT(bm.id_bahan) AS frekuensi
         FROM (
-            SELECT id_bahan_kh AS id_bahan FROM tb_menu_harian WHERE tanggal BETWEEN ? AND ? AND id_bahan_kh IS NOT NULL
+            SELECT mh.id_bahan_kh AS id_bahan 
+            FROM tb_menu_harian mh
+            JOIN tb_distribusi d ON mh.id_menu = d.id_menu
+            WHERE mh.tanggal BETWEEN ? AND ? 
+              AND d.id_sekolah_tujuan = ? 
+              AND d.status_konfirmasi = '1' 
+              AND mh.id_bahan_kh IS NOT NULL
+
             UNION ALL
-            SELECT id_bahan_protein1 AS id_bahan FROM tb_menu_harian WHERE tanggal BETWEEN ? AND ? AND id_bahan_protein1 IS NOT NULL
+
+            SELECT mh.id_bahan_protein1 AS id_bahan 
+            FROM tb_menu_harian mh
+            JOIN tb_distribusi d ON mh.id_menu = d.id_menu
+            WHERE mh.tanggal BETWEEN ? AND ? 
+              AND d.id_sekolah_tujuan = ? 
+              AND d.status_konfirmasi = '1' 
+              AND mh.id_bahan_protein1 IS NOT NULL
+
             UNION ALL
-            SELECT id_bahan_protein2 AS id_bahan FROM tb_menu_harian WHERE tanggal BETWEEN ? AND ? AND id_bahan_protein2 IS NOT NULL
+
+            SELECT mh.id_bahan_protein2 AS id_bahan 
+            FROM tb_menu_harian mh
+            JOIN tb_distribusi d ON mh.id_menu = d.id_menu
+            WHERE mh.tanggal BETWEEN ? AND ? 
+              AND d.id_sekolah_tujuan = ? 
+              AND d.status_konfirmasi = '1' 
+              AND mh.id_bahan_protein2 IS NOT NULL
+
             UNION ALL
-            SELECT id_bahan_sayur AS id_bahan FROM tb_menu_harian WHERE tanggal BETWEEN ? AND ? AND id_bahan_sayur IS NOT NULL
+
+            SELECT mh.id_bahan_sayur AS id_bahan 
+            FROM tb_menu_harian mh
+            JOIN tb_distribusi d ON mh.id_menu = d.id_menu
+            WHERE mh.tanggal BETWEEN ? AND ? 
+              AND d.id_sekolah_tujuan = ? 
+              AND d.status_konfirmasi = '1' 
+              AND mh.id_bahan_sayur IS NOT NULL
+
             UNION ALL
-            SELECT id_bahan_buah AS id_bahan FROM tb_menu_harian WHERE tanggal BETWEEN ? AND ? AND id_bahan_buah IS NOT NULL
+
+            SELECT mh.id_bahan_buah AS id_bahan 
+            FROM tb_menu_harian mh
+            JOIN tb_distribusi d ON mh.id_menu = d.id_menu
+            WHERE mh.tanggal BETWEEN ? AND ? 
+              AND d.id_sekolah_tujuan = ? 
+              AND d.status_konfirmasi = '1' 
+              AND mh.id_bahan_buah IS NOT NULL
         ) AS menu_items
         JOIN tb_bahan_makanan bm ON menu_items.id_bahan = bm.id_bahan
-        GROUP BY bm.nama_bahan, bm.kategori -- Group juga berdasarkan kategori
+        GROUP BY bm.nama_bahan, bm.kategori
         ORDER BY frekuensi DESC, bm.nama_bahan ASC
         LIMIT 20
     ";
+    // --- AKHIR PERUBAHAN QUERY ---
 
     $stmt = $conn->prepare($sql);
     if ($stmt === false) throw new Exception("Prepare failed: " . $conn->error);
 
+    // --- 4. BIND PARAMETER DIPERBARUI ---
+    // Sekarang ada 15 parameter: 5 x (tanggal, tanggal, id_sekolah)
+    // Tipe data: (string, string, integer) x 5 = 'ssi' x 5
     $stmt->bind_param(
-        "ssssssssss",
+        "ssississississi",
         $start_date,
         $end_date,
+        $id_sekolah,
         $start_date,
         $end_date,
+        $id_sekolah,
         $start_date,
         $end_date,
+        $id_sekolah,
         $start_date,
         $end_date,
+        $id_sekolah,
         $start_date,
-        $end_date
+        $end_date,
+        $id_sekolah
     );
+    // --- AKHIR PERUBAHAN BIND --- 
 
     $stmt->execute();
     $stmt->store_result();
-    $stmt->bind_result($nama_bahan, $kategori, $frekuensi); // Tambah $kategori
+    $stmt->bind_result($nama_bahan, $kategori, $frekuensi);
 
-    // Ubah format data agar menyertakan kategori per item
     $chart_series_data = [];
     while ($stmt->fetch()) {
         $chart_series_data[] = [
-            'x' => $nama_bahan,   // Label untuk sumbu X (nama item)
-            'y' => $frekuensi,    // Nilai untuk sumbu Y (jumlah)
-            'kategori' => $kategori // Informasi tambahan
-        ];
+            'x' => $nama_bahan, 
+            'y' => $frekuensi,
+            'kategori' => $kategori 
+        ]; 
     }
     $stmt->close();
     $conn->close();
 
-    // Format data untuk ApexCharts (hanya satu series dengan data objek)
     $chart_data = [
-        // labels tidak dikirim lagi, karena ada di dalam data series
         'series' => [['name' => 'Jumlah Penyajian', 'data' => $chart_series_data]]
     ];
 
     send_json_response('success', $chart_data);
 } catch (Exception $e) {
     send_json_response('error', $e->getMessage());
-    // ... (penutupan koneksi jika perlu)
+    if (isset($stmt) && $stmt instanceof mysqli_stmt) $stmt->close();
+    if (isset($conn) && $conn instanceof mysqli) $conn->close();
 }

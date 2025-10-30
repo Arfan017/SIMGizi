@@ -11,22 +11,59 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
 include '../../../php/config.php';
 
 // Query to get account data
-$query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
-            JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 
-            JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users ORDER BY tanggal DESC";
+// $query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
+//             JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 
+//             JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users ORDER BY tanggal DESC";
+$query = "SELECT 
+            d.id_distribusi, d.tanggal, d.jam, d.jumlah, d.lokasi_gps,
+            d.status_konfirmasi, d.status_pengiriman,
+            u.nama AS nama_petugas, 
+            s.nama_sekolah AS sekolah_tujuan,
+            kh.nama_bahan AS menu_kh,
+            p1.nama_bahan AS menu_protein1,
+            p2.nama_bahan AS menu_protein2,
+            syr.nama_bahan AS menu_sayur,
+            bh.nama_bahan AS menu_buah,
+            mh.tambahan AS menu_tambahan
+          FROM tb_distribusi d
+          JOIN tb_users u ON d.id_petugas_distribusi = u.id_users 
+          JOIN tb_sekolah s ON d.id_sekolah_tujuan = s.id_sekolah 
+          LEFT JOIN tb_menu_harian mh ON d.id_menu = mh.id_menu
+          LEFT JOIN tb_bahan_makanan kh ON mh.id_bahan_kh = kh.id_bahan
+          LEFT JOIN tb_bahan_makanan p1 ON mh.id_bahan_protein1 = p1.id_bahan
+          LEFT JOIN tb_bahan_makanan p2 ON mh.id_bahan_protein2 = p2.id_bahan
+          LEFT JOIN tb_bahan_makanan syr ON mh.id_bahan_sayur = syr.id_bahan
+          LEFT JOIN tb_bahan_makanan bh ON mh.id_bahan_buah = bh.id_bahan
+          WHERE d.tanggal = CURDATE() -- Filter hanya tanggal hari ini
+          ORDER BY d.id_distribusi DESC";
+
 $result = mysqli_query($conn, $query);
 
-// Jumlah seluruh data distribusi
-$q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi");
+// // Jumlah seluruh data distribusi
+// $q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi");
+// $total_distribusi = mysqli_fetch_assoc($q_total)['total'];
+
+// // Jumlah terkonfirmasi (status = 1)
+// $q_terkonfirmasi = mysqli_query($conn, "SELECT COUNT(*) AS terkonfirmasi FROM tb_distribusi WHERE status_konfirmasi = '1'");
+// $terkonfirmasi = mysqli_fetch_assoc($q_terkonfirmasi)['terkonfirmasi'];
+
+// // Jumlah belum terkonfirmasi (status = 0)
+// $q_belum = mysqli_query($conn, "SELECT COUNT(*) AS belum FROM tb_distribusi WHERE status_konfirmasi = '0'");
+// $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
+
+
+// Jumlah seluruh data distribusi HARI INI
+$q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi WHERE tanggal = CURDATE()");
 $total_distribusi = mysqli_fetch_assoc($q_total)['total'];
 
-// Jumlah terkonfirmasi (status = 1)
-$q_terkonfirmasi = mysqli_query($conn, "SELECT COUNT(*) AS terkonfirmasi FROM tb_distribusi WHERE status_konfirmasi = '1'");
+// Jumlah terkonfirmasi HARI INI
+$q_terkonfirmasi = mysqli_query($conn, "SELECT COUNT(*) AS terkonfirmasi FROM tb_distribusi WHERE status_konfirmasi = '1' AND tanggal = CURDATE()");
 $terkonfirmasi = mysqli_fetch_assoc($q_terkonfirmasi)['terkonfirmasi'];
 
-// Jumlah belum terkonfirmasi (status = 0)
-$q_belum = mysqli_query($conn, "SELECT COUNT(*) AS belum FROM tb_distribusi WHERE status_konfirmasi = '0'");
+// Jumlah belum terkonfirmasi HARI INI
+$q_belum = mysqli_query($conn, "SELECT COUNT(*) AS belum FROM tb_distribusi WHERE status_konfirmasi = '0' AND tanggal = CURDATE()");
 $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
+
 ?>
 
 <html lang="en" class="layout-menu-fixed layout-compact" data-assets-path="../../../assets/"
@@ -289,7 +326,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                                                         </div>
                                                                     </td>
                                                                     <td class="text-truncate"><?php echo $row['sekolah_tujuan']; ?></td>
-                                                                    <td class="text-truncate"><?php echo $row['nama']; ?></td>
+                                                                    <td class="text-truncate"><?php echo $row['nama_petugas']; ?></td>
                                                                     <td class="text-truncate">
                                                                         <span><?php echo $row['jumlah']; ?></span>
                                                                     </td>
@@ -323,11 +360,18 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                                                                 class="btn btn-sm btn-outline-warning btnDetail"
                                                                                 data-bs-toggle="modal"
                                                                                 data-bs-target="#ModalDetail"
-                                                                                data-id_distribusi="<?= $row['nama'] ?>"
+                                                                                data-id_distribusi="<?= $row['id_distribusi'] ?>"
+                                                                                data-petugas="<?= $row['nama_petugas'] ?>"
                                                                                 data-tanggal="<?= $row['tanggal'] ?>"
                                                                                 data-jumlah="<?= $row['jumlah'] ?>"
                                                                                 data-tujuan="<?= $row['sekolah_tujuan'] ?>"
-                                                                                data-lokasi_gps="<?= $row['lokasi_gps'] ?>">Detail</button>
+                                                                                data-lokasi_gps="<?= $row['lokasi_gps'] ?>"
+                                                                                data-menu_kh="<?= $row['menu_kh'] ?? '-' ?>"
+                                                                                data-menu_p1="<?= $row['menu_protein1'] ?? '-' ?>"
+                                                                                data-menu_p2="<?= $row['menu_protein2'] ?? '-' ?>"
+                                                                                data-menu_sayur="<?= $row['menu_sayur'] ?? '-' ?>"
+                                                                                data-menu_buah="<?= $row['menu_buah'] ?? '-' ?>"
+                                                                                data-menu_tambahan="<?= $row['menu_tambahan'] ?? '-' ?>">Detail</button>
                                                                         </div>
                                                                     </td>
                                                                 <?php
@@ -359,7 +403,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                                         <small class="text-muted">Petugas: <span id="detailIdDistribusi"></span></small>
                                                     </div>
                                                 </div>
-                                                <div class="modal-body">
+                                                <!-- <div class="modal-body">
                                                     <div class="mb-2">
                                                         <span class="me-2"><b>Dikirim:</b> <span id="detailJumlah"></span></span>
                                                         <span class="me-2"><b>Tgl:</b> <span id="detailTanggal"></span></span>
@@ -376,6 +420,65 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                                         </span>
                                                     </div>
 
+                                                </div> -->
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <span class="me-2"><b>Dikirim:</b> <span id="detailJumlah"></span> Porsi</span>
+                                                        <br>
+                                                        <span class="me-2"><b>Tgl:</b> <span id="detailTanggal"></span></span>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <h6 class="fw-bold">Detail Menu:</h6>
+                                                        <div class="table-responsive">
+                                                            <table class="table table-bordered table-sm" style="margin-bottom: 0;">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th style="width: 120px;">Kategori</th>
+                                                                        <th>Item Menu</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td>Karbohidrat (KH)</td>
+                                                                        <td><span id="detailMenuKh">-</span></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Protein 1</td>
+                                                                        <td><span id="detailMenuP1">-</span></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Protein 2</td>
+                                                                        <td><span id="detailMenuP2">-</span></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Sayur</td>
+                                                                        <td><span id="detailMenuSayur">-</span></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Buah</td>
+                                                                        <td><span id="detailMenuBuah">-</span></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Tambahan</td>
+                                                                        <td><span id="detailMenuTambahan">-</span></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="my-2">
+
+                                                    <div>
+                                                        <b>Lokasi:</b>
+                                                        <a href="#" id="detailLokasiLink" class="text-primary text-decoration-underline" target="_blank">
+                                                            <i class="ri-map-pin-2-fill"> <span id="detailLokasi"></span></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-info btn-sm ms-2" data-bs-toggle="modal"
+                                                            data-bs-target="#modalMap">
+                                                            Preview Map
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -437,7 +540,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
         <script src="../../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
         <script src="../../../assets/vendor/js/menu.js"></script>
 
-        <script>
+        <!-- <script>
             $(document).on("click", ".btnDetail", function() {
                 let id_distribusi = $(this).data("id_distribusi");
                 let tanggal = $(this).data("tanggal");
@@ -466,8 +569,63 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
 
                 }
             }
-        </script>
+        </script> -->
 
+        <script>
+            $(document).on("click", ".btnDetail", function() {
+                // Ambil semua data dari tombol
+                let petugas = $(this).data("petugas"); // Ganti dari id_distribusi ke petugas
+                let tanggal = $(this).data("tanggal");
+                let jumlah = $(this).data("jumlah");
+                let lokasi = $(this).data("lokasi_gps");
+                let tujuan = $(this).data("tujuan");
+
+                // Ambil data menu
+                let menu_kh = $(this).data("menu_kh");
+                let menu_p1 = $(this).data("menu_p1");
+                let menu_p2 = $(this).data("menu_p2");
+                let menu_sayur = $(this).data("menu_sayur");
+                let menu_buah = $(this).data("menu_buah");
+                let menu_tambahan = $(this).data("menu_tambahan");
+
+                const mapFrame = document.getElementById("mapFrame");
+
+                // Isi modal header
+                $("#detailTujuan").text(tujuan);
+                $("#detailIdDistribusi").text(petugas); // Ganti ID jadi nama petugas
+
+                // Isi modal body - Info Pengiriman
+                $("#detailJumlah").text(jumlah);
+                $("#detailTanggal").text(tanggal);
+
+                // Isi modal body - Info Menu
+                $("#detailMenuKh").text(menu_kh || '-'); // Tampilkan '-' jika kosong
+                $("#detailMenuP1").text(menu_p1 || '-');
+                $("#detailMenuP2").text(menu_p2 || '-');
+                $("#detailMenuSayur").text(menu_sayur || '-');
+                $("#detailMenuBuah").text(menu_buah || '-');
+                $("#detailMenuTambahan").text(menu_tambahan || '-');
+
+                // Isi modal body - Info Lokasi
+                var lokasiLink = $("#detailLokasiLink");
+                $("#detailLokasi").text(lokasi || 'Tidak ada');
+
+                if (lokasi) {
+                    // Update link Google Maps
+                    let gmapsUrl = `https://www.google.com/maps?q=${lokasi}`;
+                    lokasiLink.attr("href", gmapsUrl).attr("target", "_blank");
+
+                    // Update iframe src untuk preview
+                    // Pastikan koordinat dalam format lat,lng
+                    mapFrame.src = `https://maps.google.com/maps?q=${lokasi}&z=15&output=embed`;
+                } else {
+                    lokasiLink.attr("href", "#").removeAttr("target");
+                    mapFrame.src = ""; // Kosongkan iframe
+                }
+            });
+
+            // Fungsi previewLokasi() sepertinya tidak terpakai, bisa dihapus.
+        </script>
 
         <!-- endbuild -->
 

@@ -261,21 +261,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                                     <?php endif; ?>
                                                                 </div>
                                                             </td>
-
-                                                            <!-- LAMA -->
-                                                            <!-- <td>
-                                                                <div class="btn-group">
-                                                                    <?php if ($row['status_pengiriman'] === '0'): ?>
-                                                                        <button type="button" class="btn btn-sm btn-outline-success btnKirim"
-                                                                            data-id="<?php echo $row['id_distribusi']; ?>">Kirim</button>
-                                                                    <?php elseif ($row['status_pengiriman'] === '1'): ?>
-                                                                        <button type="button" class="btn btn-sm btn-outline-danger btnBatalKirim"
-                                                                            data-id="<?php echo $row['id_distribusi']; ?>">Batal Kirim</button>
-                                                                    <?php else: ?>
-                                                                        <span class="text-muted">-</span>
-                                                                    <?php endif; ?>
-                                                                </div>
-                                                            </td> -->
                                                         </tr>
                                                 <?php
                                                     }

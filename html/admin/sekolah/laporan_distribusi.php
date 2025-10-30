@@ -11,11 +11,36 @@ include '../../../php/config.php';
 
 $id_sekolah = $_SESSION['id_asal_sekolah'];
 
-$query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
-            JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users 
-            JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
-            WHERE tb_distribusi.status_konfirmasi = '1' AND tb_distribusi.id_sekolah_tujuan = '$id_sekolah' 
-            ORDER BY tb_distribusi.tanggal DESC";
+// $query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
+//             JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users 
+//             JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
+//             WHERE tb_distribusi.status_konfirmasi = '1' AND tb_distribusi.id_sekolah_tujuan = '$id_sekolah' 
+//             ORDER BY tb_distribusi.tanggal DESC";
+
+// --- Query BARU yang lebih lengkap ---
+$query = "SELECT 
+            d.id_distribusi, d.tanggal, d.jam, d.jumlah, d.lokasi_gps,
+            d.status_konfirmasi, d.status_pengiriman, d.jam_tiba,
+            u.nama AS nama_petugas, 
+            s.nama_sekolah AS sekolah_tujuan,
+            kh.nama_bahan AS menu_kh,
+            p1.nama_bahan AS menu_protein1,
+            p2.nama_bahan AS menu_protein2,
+            syr.nama_bahan AS menu_sayur,
+            bh.nama_bahan AS menu_buah,
+            mh.tambahan AS menu_tambahan
+          FROM tb_distribusi d
+          JOIN tb_users u ON d.id_petugas_distribusi = u.id_users 
+          JOIN tb_sekolah s ON d.id_sekolah_tujuan = s.id_sekolah 
+          LEFT JOIN tb_menu_harian mh ON d.id_menu = mh.id_menu
+          LEFT JOIN tb_bahan_makanan kh ON mh.id_bahan_kh = kh.id_bahan
+          LEFT JOIN tb_bahan_makanan p1 ON mh.id_bahan_protein1 = p1.id_bahan
+          LEFT JOIN tb_bahan_makanan p2 ON mh.id_bahan_protein2 = p2.id_bahan
+          LEFT JOIN tb_bahan_makanan syr ON mh.id_bahan_sayur = syr.id_bahan
+          LEFT JOIN tb_bahan_makanan bh ON mh.id_bahan_buah = bh.id_bahan
+          WHERE d.status_konfirmasi = '1' AND d.id_sekolah_tujuan = '$id_sekolah' 
+          ORDER BY d.tanggal DESC";
+// --- Akhir Query BARU ---
 
 $result = mysqli_query($conn, $query);
 
@@ -217,7 +242,7 @@ $result = mysqli_query($conn, $query);
                                                                         </div>
                                                                     </div>
                                                                 </td>
-                                                                <td class="text-truncate"><?php echo $row['nama']; ?></td>
+                                                                <td class="text-truncate"><?php echo $row['nama_petugas']; ?></td>
                                                                 <td class="text-truncate">
                                                                     <span><?php echo $row['jumlah']; ?></span>
                                                                 </td>
@@ -229,11 +254,23 @@ $result = mysqli_query($conn, $query);
                                                                             class="btn btn-sm btn-outline-success btnDetail"
                                                                             data-bs-toggle="modal"
                                                                             data-bs-target="#ModalDetail"
-                                                                            data-id_distribusi="<?= $row['nama'] ?>"
+                                                                            data-id_distribusi="<?= $row['id_distribusi'] ?>"
+                                                                            data-petugas="<?= $row['nama_petugas'] ?>"
                                                                             data-tanggal="<?= $row['tanggal'] ?>"
+                                                                            data-jam_tiba="<?= $row['jam_tiba'] ?? $row['jam'] ?>"
                                                                             data-jumlah="<?= $row['jumlah'] ?>"
                                                                             data-tujuan="<?= $row['sekolah_tujuan'] ?>"
-                                                                            data-lokasi_gps="<?= $row['lokasi_gps'] ?>">Detail</button>
+                                                                            data-lokasi_gps="<?= $row['lokasi_gps'] ?>"
+                                                                            data-status_pengiriman="<?= $row['status_pengiriman'] ?>"
+                                                                            data-status_konfirmasi="<?= $row['status_konfirmasi'] ?>"
+                                                                            data-menu_kh="<?= $row['menu_kh'] ?? '-' ?>"
+                                                                            data-menu_p1="<?= $row['menu_protein1'] ?? '-' ?>"
+                                                                            data-menu_p2="<?= $row['menu_protein2'] ?? '-' ?>"
+                                                                            data-menu_sayur="<?= $row['menu_sayur'] ?? '-' ?>"
+                                                                            data-menu_buah="<?= $row['menu_buah'] ?? '-' ?>"
+                                                                            data-menu_tambahan="<?= $row['menu_tambahan'] ?? '-' ?>">
+                                                                            Detail
+                                                                        </button>
                                                                     </div>
                                                                 </td>
                                                             <?php }
@@ -252,7 +289,7 @@ $result = mysqli_query($conn, $query);
                     </div>
 
                     <!-- Modal Detail -->
-                    <div class="modal fade" id="ModalDetail" tabindex="-1" aria-hidden="true">
+                    <!-- <div class="modal fade" id="ModalDetail" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -283,7 +320,63 @@ $result = mysqli_query($conn, $query);
                                 </div>
                             </div>
                         </div>
+                    </div> -->
+
+                    <div class="modal fade" id="ModalDetail" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalDetailTitle">Detail Laporan Distribusi</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Informasi lengkap pengiriman makanan bergizi yang telah diterima.</p>
+                                    <hr>
+
+                                    <h6 class="fw-bold text-success">Data Umum Pengiriman</h6>
+                                    <dl class="row mb-3">
+                                        <dt class="col-sm-5">Nama Sekolah:</dt>
+                                        <dd class="col-sm-7" id="detailTujuan">-</dd>
+
+                                        <dt class="col-sm-5">Petugas Pengantar:</dt>
+                                        <dd class="col-sm-7" id="detailPetugas">-</dd>
+
+                                        <dt class="col-sm-5">Tanggal Distribusi:</dt>
+                                        <dd class="col-sm-7" id="detailTanggal">-</dd>
+
+                                        <dt class="col-sm-5">Waktu Penerimaan:</dt>
+                                        <dd class="col-sm-7" id="detailJamTiba">-</dd>
+
+                                        <dt class="col-sm-5">Jumlah Porsi:</dt>
+                                        <dd class="col-sm-7" id="detailJumlah">- Porsi</dd>
+
+                                        <dt class="col-sm-5">Status Pengiriman:</dt>
+                                        <dd class="col-sm-7"><span id="detailStatusPengiriman" class="badge"></span></dd>
+
+                                        <dt class="col-sm-5">Status Konfirmasi:</dt>
+                                        <dd class="col-sm-7"><span id="detailStatusKonfirmasi" class="badge"></span></dd>
+                                    </dl>
+
+                                    <h6 class="fw-bold text-success">Rincian Menu Makanan</h6>
+                                    <ul class="list-group list-group-flush mb-3">
+                                        <li class="list-group-item d-flex justify-content-between"><strong>KH:</strong> <span id="detailMenuKh">-</span></li>
+                                        <li class="list-group-item d-flex justify-content-between"><strong>Protein 1:</strong> <span id="detailMenuP1">-</span></li>
+                                        <li class="list-group-item d-flex justify-content-between"><strong>Protein 2:</strong> <span id="detailMenuP2">-</span></li>
+                                        <li class="list-group-item d-flex justify-content-between"><strong>Sayur:</strong> <span id="detailMenuSayur">-</span></li>
+                                        <li class="list-group-item d-flex justify-content-between"><strong>Buah:</strong> <span id="detailMenuBuah">-</span></li>
+                                        <li class="list-group-item d-flex justify-content-between"><strong>Tambahan:</strong> <span id="detailMenuTambahan">-</span></li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                                    <button type="button" class="btn btn-success" id="btnCetakDetail">
+                                        <i class="ri-printer-line me-1"></i> Cetak Laporan Ini
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
 
                     <!-- Modal Filter Data -->
                     <div class="modal fade" id="ModalFilterData" tabindex="-1" aria-hidden="true">
@@ -365,6 +458,9 @@ $result = mysqli_query($conn, $query);
     <script src="../../../assets/vendor/js/menu.js"></script>
 
     <script>
+        // Variabel global untuk menyimpan ID Distribusi yang sedang dilihat
+        var currentDetailId = null;
+
         $(document).ready(function() {
             $('#btnFilterData').on('click', function() {
                 var tanggalMulai = $('#filterTanggalMulai').val();
@@ -408,29 +504,84 @@ $result = mysqli_query($conn, $query);
         });
 
 
+        // --- Handler BARU untuk klik tombol Detail ---
         $(document).on("click", ".btnDetail", function() {
-            let id_distribusi = $(this).data("id_distribusi");
+            // 1. Simpan ID Distribusi
+            currentDetailId = $(this).data("id_distribusi");
+
+            // 2. Ambil semua data dari tombol
+            let petugas = $(this).data("petugas");
             let tanggal = $(this).data("tanggal");
+            let jam_tiba = $(this).data("jam_tiba");
             let jumlah = $(this).data("jumlah");
-            let lokasi = $(this).data("lokasi_gps");
             let tujuan = $(this).data("tujuan");
+            let lokasi = $(this).data("lokasi_gps");
+            let status_pengiriman = $(this).data("status_pengiriman").toString();
+            let status_konfirmasi = $(this).data("status_konfirmasi").toString();
 
-            // Isi modal
-            $("#detailIdDistribusi").text(id_distribusi);
-            $("#detailTanggal").text(tanggal);
-            $("#detailJumlah").text(jumlah);
-            $("#detailTujuan").text(tujuan);
-            $("#detailLokasi").text(lokasi);
+            // Ambil data menu
+            let menu_kh = $(this).data("menu_kh");
+            let menu_p1 = $(this).data("menu_p1");
+            let menu_p2 = $(this).data("menu_p2");
+            let menu_sayur = $(this).data("menu_sayur");
+            let menu_buah = $(this).data("menu_buah");
+            let menu_tambahan = $(this).data("menu_tambahan");
 
-            if (lokasi) {
-                $("#detailLokasiLink").attr("href", "https://maps.google.com/maps?q=" + lokasi)
-                    .text(lokasi);
+            // 3. Isi Modal - Data Umum
+            $("#detailTujuan").text(tujuan || '-');
+            $("#detailPetugas").text(petugas || '-');
+            $("#detailTanggal").text(tanggal || '-');
+            $("#detailJamTiba").text(jam_tiba || '-');
+            $("#detailJumlah").text(jumlah || '0');
+
+            // 4. Isi Modal - Status (dengan terjemahan)
+            let statusKirimSpan = $("#detailStatusPengiriman");
+            if (status_pengiriman === '2') {
+                statusKirimSpan.text('Diterima').removeClass('bg-warning').addClass('bg-success');
+            } else if (status_pengiriman === '1') {
+                statusKirimSpan.text('Dalam Perjalanan').removeClass('bg-success').addClass('bg-info');
             } else {
-                $("#detailLokasiLink").text("Tidak ada lokasi");
+                statusKirimSpan.text('Belum Dikirim').removeClass('bg-success').addClass('bg-warning');
+            }
+
+            let statusKonfirmSpan = $("#detailStatusKonfirmasi");
+            if (status_konfirmasi === '1') {
+                statusKonfirmSpan.text('Terkonfirmasi').removeClass('bg-warning').addClass('bg-success');
+            } else {
+                statusKonfirmSpan.text('Belum Dikonfirmasi').removeClass('bg-success').addClass('bg-warning');
+            }
+
+            // 5. Isi Modal - Rincian Menu
+            $("#detailMenuKh").text(menu_kh || '-');
+            $("#detailMenuP1").text(menu_p1 || '-');
+            $("#detailMenuP2").text(menu_p2 || '-');
+            $("#detailMenuSayur").text(menu_sayur || '-');
+            $("#detailMenuBuah").text(menu_buah || '-');
+            $("#detailMenuTambahan").text(menu_tambahan || '-');
+
+            // 6. Isi Modal - Lokasi (jika diaktifkan)
+            // $("#detailLokasi").text(lokasi || 'Tidak ada');
+            // if (lokasi) {
+            //     $("#detailLokasiLink").attr("href", `https://maps.google.com/maps?q={lokasi}`).attr("target", "_blank");
+            //     $("#mapFrame").attr("src", `https://maps.google.com/maps?q=${lokasi}&z=15&output=embed`);
+            // } else {
+            //     $("#detailLokasiLink").attr("href", "#").removeAttr("target");
+            //     $("#mapFrame").attr("src", "");
+            // }
+        });
+
+        // --- Handler BARU untuk tombol Cetak Detail di dalam Modal ---
+        $('#btnCetakDetail').on('click', function() {
+            if (currentDetailId) {
+                // Buat URL ke skrip cetak detail baru (yang perlu Anda buat)
+                let url = `../../../php/sekolah/cetak_laporan_detail.php?id_distribusi=${currentDetailId}`;
+                window.open(url, "_blank");
+            } else {
+                alert('Tidak ada ID distribusi yang dipilih.');
             }
         });
 
-
+        // --- Fungsi Cetak Laporan (Ringkasan) ---
         function cetakLaporan() {
             var tanggalMulai = $('#filterTanggalMulai').val();
             var tanggalAkhir = $('#filterTanggalAkhir').val();
