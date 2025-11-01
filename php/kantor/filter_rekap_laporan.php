@@ -6,7 +6,6 @@ $tanggal_akhir = $_POST['tanggal_akhir'] ?? '';
 $sekolah = $_POST['sekolah'] ?? '';
 $status_pengiriman = $_POST['status_pengiriman'] ?? '';
 
-// $nama_sekolah = '';
 
 $where = "WHERE 1=1";
 if ($tanggal_mulai && $tanggal_akhir) {

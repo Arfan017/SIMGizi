@@ -3,7 +3,7 @@ ob_clean();
 include '../config.php';
 header('Content-Type: application/json');
 
-$kategori_list = ['KH', 'Protein', 'Sayur', 'Buah']; // Kategori yang dibutuhkan
+$kategori_list = ['KH', 'Protein', 'Sayur', 'Buah'];
 $options = [];
 
 try {
@@ -18,7 +18,7 @@ try {
         while ($stmt->fetch()) {
             $bahan_per_kategori[] = ['id' => $id_bahan, 'nama' => $nama_bahan];
         }
-        $options[$kategori] = $bahan_per_kategori; // Simpan hasil per kategori
+        $options[$kategori] = $bahan_per_kategori; 
         $stmt->close();
     }
     $conn->close();

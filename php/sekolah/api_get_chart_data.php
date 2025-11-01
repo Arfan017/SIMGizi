@@ -1,5 +1,4 @@
 <?php
-// 1. Bersihkan output buffer untuk menghapus spasi/error PHP
 ob_clean();
 session_name('SIMGiziSekolah');
 session_start();
@@ -9,7 +8,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') {
 }
 include '../config.php';
 
-// 2. Logika utama dimasukkan ke dalam try-catch untuk menangani error
 try {
     if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') {
         throw new Exception('Akses ditolak');
@@ -24,7 +22,6 @@ try {
     $map = [];
 
     if ($view_type === 'monthly') {
-        // --- LOGIKA BULANAN ---
         $start = new DateTime('first day of January this year');
         $startDate = $start->format('Y-m-d');
         $sql = "SELECT DATE_FORMAT(tanggal, '%Y-%m') AS ym, SUM(jumlah_habis) AS total_habis, SUM(jumlah_kembali) AS total_kembali 
@@ -54,7 +51,6 @@ try {
             $current->modify('+1 month');
         }
     } else {
-        // --- LOGIKA HARIAN ---
         $start = new DateTime('monday this week');
         $end = new DateTime('sunday this week');
         $startDate = $start->format('Y-m-d');
@@ -84,20 +80,18 @@ try {
     $stmt->close();
     $conn->close();
 
-    // 3. Set header TEPAT SEBELUM echo
     header('Content-Type: application/json');
     echo json_encode([
-        'status' => 'success', // Tambahkan status sukses
+        'status' => 'success',
         'labels' => $labels,
         'series' => [
             ['name' => 'Jumlah Habis', 'data' => $habis_data],
             ['name' => 'Jumlah Kembali', 'data' => $kembali_data]
         ]
     ]);
-    exit; // Pastikan tidak ada output lain
+    exit; 
 
 } catch (Exception $e) {
-    // Jika ada error, kirim sebagai JSON
     header('Content-Type: application/json', true, 500);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     exit;

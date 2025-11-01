@@ -11,7 +11,6 @@ include '../../../php/config.php';
 
 $id_sekolah = $_SESSION['id_asal_sekolah'];
 
-// Query to get account data
 $query = "SELECT tb_distribusi.*, tb_users.nama, tb_sekolah.nama_sekolah as sekolah_tujuan FROM tb_distribusi 
           JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users
           JOIN tb_sekolah ON tb_sekolah.id_sekolah = tb_distribusi.id_sekolah_tujuan
@@ -448,7 +447,6 @@ $status_pengiriman_text = '';
 
     <script>
         (function() {
-            // Ambil data yang sudah disiapkan oleh PHP
             var categories = <?php echo json_encode($months); ?>;
             var dataHabis = <?php echo json_encode($habis_counts); ?>;
             var dataKembali = <?php echo json_encode($kembali_counts); ?>;
@@ -457,12 +455,11 @@ $status_pengiriman_text = '';
                 chart: {
                     type: 'bar',
                     height: 450,
-                    stacked: true, // <-- 1. Aktifkan mode stacked (bertumpuk)
+                    stacked: true,
                     toolbar: {
                         show: false
                     }
                 },
-                // 2. Definisikan dua seri data
                 series: [{
                     name: 'Jumlah Habis',
                     data: dataHabis
@@ -476,16 +473,13 @@ $status_pengiriman_text = '';
                         rotate: -45
                     }
                 },
-                // 3. Definisikan dua warna untuk setiap seri
-                colors: ['#28a745', '#ffc107'], // Hijau untuk 'habis', Kuning untuk 'kembali'
+                colors: ['#28a745', '#ffc107'],
 
-                // Konfigurasi tambahan untuk stacked bar chart
                 plotOptions: {
                     bar: {
                         horizontal: false,
                         columnWidth: '50%',
                         dataLabels: {
-                            // Tampilkan total di atas setiap batang
                             total: {
                                 enabled: true,
                                 style: {
@@ -497,7 +491,7 @@ $status_pengiriman_text = '';
                     },
                 },
                 dataLabels: {
-                    enabled: false // Sembunyikan label di dalam setiap segmen
+                    enabled: false 
                 },
                 legend: {
                     position: 'top',

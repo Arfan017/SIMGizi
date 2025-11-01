@@ -238,11 +238,9 @@ include '../../../php/config.php';
 
     <script>
         $(document).ready(function() {
-            // Variabel global untuk instance chart
             var chartJumlah;
             var chartFrekuensi;
 
-            // --- Opsi LENGKAP untuk Chart Jumlah (Stacked Bar) ---
             var optionsJumlah = {
                 chart: {
                     type: 'bar',
@@ -252,14 +250,14 @@ include '../../../php/config.php';
                         show: true
                     }
                 },
-                series: [], // Akan diisi dari API
+                series: [],
                 xaxis: {
-                    categories: [], // Akan diisi dari API
+                    categories: [],
                     labels: {
                         rotate: -45
                     }
                 },
-                colors: ['#28a745', '#ffc107'], // Hijau & Kuning
+                colors: ['#28a745', '#ffc107'],
                 plotOptions: {
                     bar: {
                         horizontal: false,
@@ -277,7 +275,7 @@ include '../../../php/config.php';
                 },
                 dataLabels: {
                     enabled: false
-                }, // Label di dalam segmen disembunyikan
+                },
                 legend: {
                     position: 'top',
                     horizontalAlign: 'center'
@@ -287,10 +285,10 @@ include '../../../php/config.php';
                 },
                 noData: {
                     text: 'Memuat data...'
-                } // Teks loading awal
+                } 
             };
 
-            // --- Opsi LENGKAP untuk Chart Frekuensi (Vertical Bar dg Warna Kategori) ---
+           
             var optionsFrekuensi = {
                 chart: {
                     type: 'bar',
@@ -301,17 +299,15 @@ include '../../../php/config.php';
                 },
                 plotOptions: {
                     bar: {
-                        horizontal: false, // Vertikal
+                        horizontal: false,
                         columnWidth: '60%',
-                        // --- Distribusi Warna Berdasarkan Fungsi ---
-                        distributed: true, // PENTING: Aktifkan mode warna terdistribusi
+                        
+                        distributed: true, 
                         dataLabels: {
                             position: 'top',
                         },
                     }
                 },
-                // --- Hapus colors utama, akan diatur oleh fungsi ---
-                // colors: ['#0d6efd'],
                 dataLabels: {
                     enabled: true,
                     offsetY: -20,
@@ -323,18 +319,18 @@ include '../../../php/config.php';
                         return val;
                     }
                 },
-                series: [], // Akan diisi dari API
+                series: [], 
                 xaxis: {
-                    // Kategori X sekarang diambil dari 'x' di data series
-                    type: 'category', // Set tipe ke category
-                    categories: [], // Kosongkan, akan diisi dari data series
+                  
+                    type: 'category', 
+                    categories: [],
                     title: {
                         text: 'Item Menu'
                     },
                     labels: {
                         rotate: -45,
                         trim: true
-                    } // Miringkan & potong label panjang
+                    } 
                 },
                 yaxis: {
                     title: {
@@ -343,7 +339,7 @@ include '../../../php/config.php';
                 },
                 legend: {
                     show: false
-                }, // Tetap sembunyikan
+                }, 
                 tooltip: {
                     y: {
                         formatter: function(val) {
@@ -354,30 +350,14 @@ include '../../../php/config.php';
                 noData: {
                     text: 'Memuat data...'
                 },
-                // --- Fungsi untuk menentukan warna batang ---
                 fill: {
                     opacity: 1 // Pastikan warna solid
                 },
-                // ApexCharts secara otomatis akan menggunakan 'colors' di bawah JIKA 'distributed: true'
-                // Definisikan palet warna untuk kategori
-                colors: ['#0d6efd', '#28a745', '#ffc107', '#fd7e14', '#6f42c1'] // Contoh: Biru (KH?), Hijau(Sayur?), Kuning(Protein?), Oranye(Buah?), Ungu(Lainnya?)
-                // ATAU Gunakan fungsi untuk pemetaan eksplisit (lebih aman jika urutan data berubah)
-                /*
-                colors: function({ value, seriesIndex, dataPointIndex, w }) {
-                    // Ambil kategori dari data asli yang kita kirim
-                    let category = w.config.series[seriesIndex].data[dataPointIndex].kategori;
-                    switch (category) {
-                        case 'KH': return '#0d6efd'; // Biru
-                        case 'Protein': return '#ffc107'; // Kuning
-                        case 'Sayur': return '#28a745'; // Hijau
-                        case 'Buah': return '#fd7e14'; // Oranye
-                        default: return '#6c757d'; // Abu-abu
-                    }
-                }
-                */
+            
+                colors: ['#0d6efd', '#28a745', '#ffc107', '#fd7e14', '#6f42c1']
+
             };
 
-            // --- Inisialisasi Chart (Dengan Pengecekan Elemen) ---
             var chartElJumlah = document.querySelector('#chartJumlah');
             if (chartElJumlah) {
                 chartJumlah = new ApexCharts(chartElJumlah, optionsJumlah);
@@ -399,19 +379,16 @@ include '../../../php/config.php';
             }
 
 
-            /**
-             * Fungsi HANYA untuk memuat data Chart Jumlah (Habis/Kembali).
-             */
+
             function loadChartJumlahData(viewType) {
-                // Tampilkan loading di div chart
                 $('#chartJumlah').html('<p class="text-center text-muted">Memuat data...</p>');
                 if (chartJumlah) {
-                    chartJumlah.destroy(); // Hancurkan chart lama jika ada
-                    chartJumlah = null; // Hapus referensi lama
+                    chartJumlah.destroy();
+                    chartJumlah = null; 
                 }
 
                 $.ajax({
-                    url: '../../../php/sekolah/api_get_chart_data.php', // API chart jumlah
+                    url: '../../../php/sekolah/api_get_chart_data.php',
                     type: 'GET',
                     data: {
                         view: viewType
@@ -420,13 +397,11 @@ include '../../../php/config.php';
                     success: function(response) {
                         console.log("Data Jumlah Diterima:", JSON.stringify(response, null, 2));
                         try {
-                            // Validasi data (seperti sebelumnya)
                             if (!response || response.status !== 'success' || !response.labels || !response.series || !Array.isArray(response.labels) || !Array.isArray(response.series)) {
                                 throw new Error(response ? (response.message || 'Format data jumlah salah') : 'Respon jumlah tidak valid');
                             }
 
                             console.log("Membuat ulang Chart Jumlah...");
-                            // Buat Opsi Baru Lengkap untuk pembuatan ulang
                             var newOptionsJumlah = {
                                 chart: {
                                     type: 'bar',
@@ -436,13 +411,13 @@ include '../../../php/config.php';
                                         show: true
                                     }
                                 },
-                                series: response.series, // Data baru
+                                series: response.series, 
                                 xaxis: {
                                     categories: response.labels,
                                     labels: {
                                         rotate: -45
                                     }
-                                }, // Data baru
+                                }, 
                                 colors: ['#28a745', '#ffc107'],
                                 plotOptions: {
                                     bar: {
@@ -474,12 +449,11 @@ include '../../../php/config.php';
                                 }
                             };
 
-                            // Kosongkan div sebelum render baru
+
                             $('#chartJumlah').empty();
 
-                            // Buat instance baru
                             chartJumlah = new ApexCharts(document.querySelector('#chartJumlah'), newOptionsJumlah);
-                            chartJumlah.render(); // Render chart baru
+                            chartJumlah.render();
                             console.log("Chart Jumlah berhasil dibuat ulang.");
 
                         } catch (e) {
@@ -492,17 +466,13 @@ include '../../../php/config.php';
                         $('#chartJumlah').html('<p class="text-center text-danger">Gagal memuat data chart jumlah.</p>');
                     }
                 });
-            } // Akhir fungsi loadChartJumlahData
+            }
 
-            /**
-             * Fungsi HANYA untuk memuat data Chart Frekuensi Item Menu (dg Warna Kategori).
-             */
             function loadChartFrekuensiData(viewType) {
                 if (!chartFrekuensi) {
                     console.error("Instance chartFrekuensi belum siap.");
                     return;
                 }
-                // Reset state loading (penting untuk hapus kategori lama)
                 chartFrekuensi.updateOptions({
                     series: [],
                     xaxis: {
@@ -510,7 +480,7 @@ include '../../../php/config.php';
                         title: {
                             text: 'Item Menu'
                         }
-                    }, // Reset X axis
+                    },
                     yaxis: {
                         title: {
                             text: 'Jumlah Penyajian'
@@ -531,38 +501,35 @@ include '../../../php/config.php';
                     success: function(response) {
                         console.log("Data Frekuensi Diterima:", JSON.stringify(response, null, 2));
                         try {
-                            // Validasi data (API sekarang mengirim 'series' langsung)
                             if (!response || response.status !== 'success' || !response.data || !response.data.series || !Array.isArray(response.data.series) || response.data.series.length === 0 || !response.data.series[0].data || !Array.isArray(response.data.series[0].data)) {
                                 throw new Error(response ? (response.message || 'Format data frekuensi salah') : 'Respon frekuensi tidak valid');
                             }
 
                             console.log("Memperbarui Chart Frekuensi (Warna Kategori)...");
 
-                            // --- PERBAIKAN: Update Series Langsung ---
-                            // ApexCharts akan otomatis mengambil label 'x' dari data series untuk xaxis
                             chartFrekuensi.updateOptions({
-                                series: response.data.series, // Update data batang (format [{x, y, kategori},...])
+                                series: response.data.series,
                                 xaxis: {
-                                    // Biarkan kosong, ApexCharts akan mengisinya dari 'x'
+                                    
                                     categories: [],
                                     title: {
                                         text: 'Item Menu'
                                     },
                                     labels: {
                                         rotate: -45,
-                                        trim: true, // Aktifkan trim jika label panjang
+                                        trim: true,
                                         style: {
                                             fontSize: '10px'
                                         }
-                                    } // Perkecil font jika perlu
+                                    } 
                                 },
-                                // Set ulang teks noData
+                               
                                 noData: {
                                     text: (response.data.series[0].data.length === 0) ? 'Tidak ada data menu.' : ''
                                 }
                             });
                             console.log("Chart Frekuensi berhasil diperbarui.");
-                            // --- AKHIR PERBAIKAN ---
+                          
 
                         } catch (e) {
                             console.error("Error saat update Chart Frekuensi:", e);
@@ -574,9 +541,9 @@ include '../../../php/config.php';
                         $('#chartFrekuensi').html('<p class="text-center text-danger">Gagal memuat data chart frekuensi.</p>');
                     }
                 });
-            } // Akhir loadChartFrekuensiData
+            }
 
-            // --- Listener untuk Tombol Filter (Tidak Berubah) ---
+            
             $('#btnJumlahBulanan').on('click', function() {
                 $(this).addClass('active').siblings().removeClass('active');
                 loadChartJumlahData('monthly');
@@ -594,7 +561,6 @@ include '../../../php/config.php';
                 loadChartFrekuensiData('daily');
             });
 
-            // Muat data default (bulanan) untuk KEDUA chart
             loadChartJumlahData('monthly');
             loadChartFrekuensiData('monthly');
         });

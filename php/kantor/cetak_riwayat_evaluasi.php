@@ -5,8 +5,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_kantor') {
     header('Location: ../../../index.php');
     exit();
 }
-require '../../dompdf/vendor/autoload.php'; // include autoloader
-require '../config.php'; // koneksi database
+require '../../dompdf/vendor/autoload.php'; 
+require '../config.php';
 
 use Dompdf\Dompdf;
 
@@ -42,7 +42,6 @@ $result = $conn->query($query);
 $petugas = $conn->query("SELECT * FROM tb_users WHERE id_users=1")->fetch_assoc();
 $nama_petugas = $petugas['nama'];
 
-// Buat HTML laporan
 $html = '
 <h2 style="text-align:center; margin-bottom:5px;">Riwayat Laporan Evaluasi Distribusi</h2>
 <br>
@@ -96,7 +95,6 @@ while ($data = $result->fetch_assoc()) {
 
 $html .= '</tbody></table>';
 
-// Tambahkan tanda tangan / footer laporan
 $html .= '
 <br><br>
 <table width="100%">
@@ -110,14 +108,11 @@ $html .= '
 </table>
 ';
 
-// Konversi ke PDF dengan Dompdf
 $dompdf = new Dompdf();
 $dompdf->loadHtml($html);
 
-// Setting ukuran & orientasi kertas
 $dompdf->setPaper('A4', 'portrait');
 
-// Render & output
 $dompdf->render();
 $dompdf->stream("riwayat_laporan_evaluasi.pdf", array("Attachment" => false));
 

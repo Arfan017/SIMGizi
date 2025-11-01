@@ -104,7 +104,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link">
+                    <a href="index.php" class="app-brand-link">
                         <i class="icon-menu icon-base ri ri-home-office-line icon-32px bg-info"></i>
                         <span class="app-brand-text demo menu-text fw-semibold ms-2">ADMIN KANTOR</span>
                     </a>
@@ -134,6 +134,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                         <a href="monitoring.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
                             <div data-i18n="Icons">Monitoring</div>
+                        </a>
+                    </li>
+
+                    <!-- Icons -->
+                    <li class="menu-item">
+                        <a href="monitoring_distribusi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
+                            <div data-i18n="Icons">Monitoring Distribusi</div>
                         </a>
                     </li>
 
@@ -298,31 +306,55 @@ while ($row = mysqli_fetch_assoc($result)) {
     <script src="../../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="../../../assets/vendor/js/menu.js"></script>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyAW6sRid6-OSsn1DShC9BDC2Nj6jPVdlU4",
+            authDomain: "simgizi-tracking.firebaseapp.com",
+            databaseURL: "https://simgizi-tracking-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "simgizi-tracking",
+            storageBucket: "simgizi-tracking.appspot.com",
+            messagingSenderId: "837440855057",
+            appId: "1:837440855057:web:8a042b2a130389aba725b0"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    </script>
+
     <script>
         var map = L.map('mapid').setView([-2.5, 118], 5);
+
         var markersData = <?= json_encode($markers) ?>;
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
         var markerGroup = L.featureGroup().addTo(map);
+
+
         var liveMarkers = {};
 
         var kurirIcon = L.icon({
-            iconUrl: '../../../assets/img/icons/pin.svg',
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448622.png',
             iconSize: [40, 40],
-            iconAnchor: [20, 40],
-            popupAnchor: [0, -40]
+            iconAnchor: [20, 40], 
+            popupAnchor: [0, -40] 
         });
+
         var selesaiIcon = L.icon({
-            iconUrl: '../../../assets/img/icons/pin_check.svg',
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/190/190411.png',
             iconSize: [40, 40],
             iconAnchor: [20, 40],
             popupAnchor: [0, -40]
         });
 
+
         markersData.forEach(function(item) {
             var latLngAwal, latLngTujuan;
+
 
             if (item.status == '2') {
                 if (item.gps_tujuan) {
@@ -338,7 +370,8 @@ while ($row = mysqli_fetch_assoc($result)) {
                         icon: selesaiIcon
                     }).bindPopup(popupSelesai).addTo(markerGroup);
                 }
-            } else {
+            }
+            else if (item.status == '1') {
                 if (item.gps_tujuan) {
                     var coordsTujuan = item.gps_tujuan.split(",");
                     latLngTujuan = L.latLng(parseFloat(coordsTujuan[0].trim()), parseFloat(coordsTujuan[1].trim()));
@@ -346,14 +379,17 @@ while ($row = mysqli_fetch_assoc($result)) {
                     L.marker(latLngTujuan).bindPopup(popupTujuan).addTo(markerGroup);
                 }
 
+
                 var posisiAwalKurir = item.lokasi_terkini || item.gps_awal;
                 if (posisiAwalKurir) {
                     var coordsAwal = posisiAwalKurir.split(",");
                     latLngAwal = L.latLng(parseFloat(coordsAwal[0].trim()), parseFloat(coordsAwal[1].trim()));
                     var popupKurir = `<b>Status: Dalam Perjalanan</b><br><b>Menuju:</b> ${item.sekolah}`;
+
                     var markerKurir = L.marker(latLngAwal, {
                         icon: kurirIcon
                     }).bindPopup(popupKurir).addTo(markerGroup);
+
                     liveMarkers[item.id] = markerKurir;
                 }
 
@@ -375,7 +411,6 @@ while ($row = mysqli_fetch_assoc($result)) {
                     }).addTo(map);
                 }
             }
-
             var jamBerangkat = item.jam_berangkat ? item.jam_berangkat.substring(0, 5) : '-';
             var jamTiba = item.jam_tiba ? item.jam_tiba.substring(0, 5) : '-';
             var tableRow = `
@@ -388,23 +423,46 @@ while ($row = mysqli_fetch_assoc($result)) {
             $('#delivery-table-body').append(tableRow);
         });
 
-        function perbaruiLokasiKurir() {
-            $.getJSON('../../../php/api/api_get_lokasi_terkini.php', function(data) {
-                console.log("Mendapat pembaruan lokasi:", data);
-                data.forEach(function(kurir) {
-                    var markerToMove = liveMarkers[kurir.id_distribusi];
-                    if (markerToMove && kurir.lokasi_terkini) {
-                        var coords = kurir.lokasi_terkini.split(",");
-                        var newLatLng = L.latLng(parseFloat(coords[0].trim()), parseFloat(coords[1].trim()));
-                        markerToMove.setLatLng(newLatLng);
-                    }
-                });
-            }).fail(function() {
-                console.error("Gagal mengambil data lokasi terkini.");
+        if (typeof database !== 'undefined') {
+            const trackingRef = database.ref('lokasi_terkini');
+
+            trackingRef.on('child_changed', (snapshot) => {
+                const id = snapshot.key;
+                const newPos = snapshot.val();
+                const markerToMove = liveMarkers[id];
+
+                if (markerToMove && newPos) {
+                    console.log("Bergerak:", id, newPos);
+                    const newLatLng = L.latLng(newPos.lat, newPos.lng);
+                    markerToMove.setLatLng(newLatLng);
+                }
             });
+
+            trackingRef.on('child_removed', (snapshot) => {
+                const id = snapshot.key;
+                const markerToRemove = liveMarkers[id];
+
+                if (markerToRemove) {
+                    console.log("Selesai (dihapus dari Firebase):", id);
+                    map.removeLayer(markerToRemove); 
+                    delete liveMarkers[id];
+                }
+            });
+
+            trackingRef.on('child_added', (snapshot) => {
+                const id = snapshot.key;
+                if (liveMarkers[id]) {
+                    console.log("Marker " + id + " sudah ada (dari data awal).");
+                    return;
+                }
+
+                console.log("Pengiriman baru dimulai:", id);
+            });
+
+        } else {
+            console.error("Firebase 'database' is not defined. Pastikan SDK dan config sudah benar.");
         }
 
-        setInterval(perbaruiLokasiKurir, 10000);
 
         setTimeout(function() {
             if (markersData.length > 0 && markerGroup.getLayers().length > 0) {

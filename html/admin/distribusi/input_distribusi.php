@@ -340,7 +340,6 @@ $result = mysqli_query($conn, $query);
     <script src="../../../assets/vendor/js/menu.js"></script>
 
     <script>
-        // Gunakan jQuery $(document).ready() untuk semua event
         $(document).ready(function() {
             var sekolahSelect = $('#sekolah');
             var lokasiInput = $('#lokasi');
@@ -348,30 +347,26 @@ $result = mysqli_query($conn, $query);
             var menuStatusAlert = $('#menuStatusAlert');
             var hiddenMenuIdInput = $('#id_menu');
 
-            // 1. Listener untuk auto-fill lokasi dari sekolah
             sekolahSelect.on("change", function() {
                 var selectedOption = $(this).find('option:selected');
-                var lokasi = selectedOption.data("lokasi"); // Ambil data-lokasi
+                var lokasi = selectedOption.data("lokasi");
                 lokasiInput.val(lokasi ? lokasi : "");
             });
 
-            // 2. BARU: Listener untuk cek menu saat tanggal berubah
             tanggalInput.on("change", function() {
                 var tanggal = $(this).val();
-                hiddenMenuIdInput.val(""); // Reset id_menu
+                hiddenMenuIdInput.val(""); 
 
                 if (!tanggal) {
                     menuStatusAlert.hide();
                     return;
                 }
 
-                // Tampilkan status loading
                 menuStatusAlert.show().removeClass('alert-success alert-danger').addClass('alert-info').text("Mengecek menu...");
 
-                // Panggil API baru untuk mendapatkan id_menu
                 $.getJSON('../../../php/distribusi/api_get_menu_id_by_tanggal.php?tanggal=' + tanggal, function(response) {
                     if (response.status === 'success' && response.id_menu) {
-                        hiddenMenuIdInput.val(response.id_menu); // Simpan ID ke hidden input
+                        hiddenMenuIdInput.val(response.id_menu);
                         menuStatusAlert.removeClass('alert-info alert-danger').addClass('alert-success');
                         menuStatusAlert.text("Menu untuk tanggal " + tanggal + " ditemukan. Siap input.");
                     } else {
@@ -384,20 +379,17 @@ $result = mysqli_query($conn, $query);
                 });
             });
 
-            // 3. Modifikasi: Submit form
             $('#formDistribusi').on('submit', function(e) {
                 e.preventDefault();
 
-                // --- BARU: Validasi id_menu sebelum submit ---
                 var menuId = hiddenMenuIdInput.val();
                 if (!menuId || menuId === "") {
                     $('#distribusiErrorMsg').text('Menu untuk tanggal yang dipilih belum diatur atau tidak valid. Silakan cek tanggal atau input menu harian terlebih dahulu.');
                     const toast = new bootstrap.Toast(document.getElementById('distribusiToastError'));
                     toast.show();
-                    return; // Hentikan submit
+                    return; 
                 }
 
-                // Cek sisa stok
                 var jumlahInput = parseInt($('#jumlah').val());
                 var stokSisa = parseInt(<?php echo $stok_sisa; ?>);
                 if (jumlahInput > stokSisa) {
@@ -406,16 +398,12 @@ $result = mysqli_query($conn, $query);
                     toast.show();
                     return;
                 }
-                // --- Akhir Validasi ---
 
                 var formData = new FormData(this);
-                // formData.delete('nama_barang'); // Tidak perlu lagi karena sudah dihapus dari HTML
-
-                // Disable tombol submit untuk mencegah klik ganda
                 $(this).find('button[type="submit"]').prop('disabled', true).text('Menyimpan...');
 
                 $.ajax({
-                    url: '../../../php/distribusi/crud_distribusi.php', // API ini harus sudah direvisi (seperti yang kita lakukan sebelumnya)
+                    url: '../../../php/distribusi/crud_distribusi.php',
                     type: 'POST',
                     data: formData,
                     processData: false,
@@ -426,14 +414,12 @@ $result = mysqli_query($conn, $query);
                             const toast = new bootstrap.Toast(document.getElementById('distribusiToastSuccess'));
                             toast.show();
                             $('#formDistribusi')[0].reset();
-                            // Reset elemen custom
                             menuStatusAlert.hide();
                             lokasiInput.val('');
                             hiddenMenuIdInput.val('');
-                            // Reload sisa stok (atau update manual jika API mengembalikan sisa baru)
                             setTimeout(function() {
                                 location.reload();
-                            }, 1500); // Reload halaman
+                            }, 1500);
                         } else {
                             $('#distribusiErrorMsg').text(response.message);
                             const toast = new bootstrap.Toast(document.getElementById('distribusiToastError'));
@@ -446,13 +432,11 @@ $result = mysqli_query($conn, $query);
                         toast.show();
                     },
                     complete: function() {
-                        // Aktifkan kembali tombol submit
                         $('#formDistribusi').find('button[type="submit"]').prop('disabled', false).text('Simpan Distribusi');
                     }
                 });
             });
 
-            // 4. Fungsi getLocation() (tetap sama)
             window.getLocation = function() {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(function(position) {
@@ -466,89 +450,7 @@ $result = mysqli_query($conn, $query);
             }
         });
     </script>
-
-    <!-- <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var sekolahSelect = document.getElementById("sekolah");
-            var lokasiInput = document.getElementById("lokasi");
-
-            sekolahSelect.addEventListener("change", function() {
-                var selectedOption = this.options[this.selectedIndex];
-                var lokasi = selectedOption.getAttribute("data-lokasi");
-
-                if (lokasi) {
-                    lokasiInput.value = lokasi; // set lokasi otomatis
-                } else {
-                    lokasiInput.value = ""; // kosongkan jika tidak ada
-                }
-            });
-        });
-
-        $('#formDistribusi').on('submit', function(e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-
-            $.ajax({
-                url: '../../../php/distribusi/crud_distribusi.php',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        const toast = new bootstrap.Toast(document.getElementById('distribusiToastSuccess'));
-                        toast.show();
-                        $('#formDistribusi')[0].reset();
-
-                        // Tampilkan data baru di panel
-                        $('#panelDistribusiBaru').html(`
-                            <div class="mb-3">
-                                <span class="fw-bold">Sekolah Tujuan:</span> ${response.data.sekolah}<br>
-                                <span class="fw-bold">Jumlah Dikirim:</span> ${response.data.jumlah}<br>
-                                <span class="fw-bold">Tanggal:</span> ${response.data.tanggal}<br>
-                                <span class="fw-bold">Jam:</span> ${response.data.jam}<br>
-                                <span class="fw-bold">Lokasi GPS:</span> ${response.data.lokasi}<br>
-                            </div>
-                            <button type="button" class="btn btn-success w-100" id="btnKirimDistribusi" data-id="${response.data.id}">
-                                <i class="ri-send-plane-2-line"></i> Kirim Distribusi
-                            </button>
-                        `);
-
-                        // Optional: setTimeout untuk reload jika ingin
-                        // setTimeout(function() { location.reload(); }, 1500);
-                    } else {
-                        $('#distribusiErrorMsg').text(response.message);
-                        const toast = new bootstrap.Toast(document.getElementById('distribusiToastError'));
-                        toast.show();
-                    }
-                },
-                error: function() {
-                    var debugStr = '';
-                    formData.forEach(function(value, key) {
-                        debugStr += key + ': ' + value + '\n';
-                    });
-                    $('#distribusiErrorMsg').text('Gagal menyimpan data.\n' + debugStr);
-                    const toast = new bootstrap.Toast(document.getElementById('distribusiToastError'));
-                    toast.show();
-                }
-            });
-        });
-
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    $('#lokasi').val(position.coords.latitude + ',' + position.coords.longitude);
-                }, function() {
-                    alert('Gagal mendapatkan lokasi!');
-                });
-            } else {
-                alert('Browser tidak mendukung geolokasi!');
-            }
-        }
-    </script> -->
-
+    
     <!-- endbuild -->
 
     <!-- Vendors JS -->

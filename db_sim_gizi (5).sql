@@ -21,104 +21,105 @@ SET time_zone = "+00:00";
 -- Database: `db_sim_gizi`
 --
 
-DELIMITER $$
---
--- Procedures
---
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateDummyDistribusi` (IN `num_rows` INT)   BEGIN
-    -- Deklarasi variabel
-    DECLARE v_counter INT DEFAULT 0;
-    DECLARE v_petugas_id INT;
-    DECLARE v_sekolah_id INT;
-    DECLARE v_lokasi_gps VARCHAR(255);
-    DECLARE v_tanggal DATE;
-    DECLARE v_jam TIME;
-    DECLARE v_jumlah INT;
-    DECLARE v_foto VARCHAR(255);
+-- DELIMITER $$
+-- --
+-- -- Procedures
+-- --
+-- CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateDummyDistribusi` (IN `num_rows` INT)   BEGIN
+--     -- Deklarasi variabel
+--     DECLARE v_counter INT DEFAULT 0;
+--     DECLARE v_petugas_id INT;
+--     DECLARE v_sekolah_id INT;
+--     DECLARE v_lokasi_gps VARCHAR(255);
+--     DECLARE v_tanggal DATE;
+--     DECLARE v_jam TIME;
+--     DECLARE v_jumlah INT;
+--     DECLARE v_foto VARCHAR(255);
 
-    -- Loop untuk membuat data sebanyak num_rows
-    WHILE v_counter < num_rows DO
-        -- 1. Ambil ID Petugas Distribusi secara acak
-        -- GANTI 'admin distribusi' dengan nama role yang benar jika berbeda
-        SELECT id_users INTO v_petugas_id
-        FROM tb_users
-        WHERE role = 'admin_distribusi' -- Sesuaikan role jika perlu
-        ORDER BY RAND() -- Ambil secara acak
-        LIMIT 1;
+--     -- Loop untuk membuat data sebanyak num_rows
+--     WHILE v_counter < num_rows DO
+--         -- 1. Ambil ID Petugas Distribusi secara acak
+--         -- GANTI 'admin distribusi' dengan nama role yang benar jika berbeda
+--         SELECT id_users INTO v_petugas_id
+--         FROM tb_users
+--         WHERE role = 'admin_distribusi' -- Sesuaikan role jika perlu
+--         ORDER BY RAND() -- Ambil secara acak
+--         LIMIT 1;
 
-        -- 2. Ambil ID Sekolah Tujuan secara acak
-        SELECT id_sekolah INTO v_sekolah_id
-        FROM tb_sekolah
-        ORDER BY RAND()
-        LIMIT 1;
 
-        -- 3. Ambil lokasi_gps berdasarkan id_sekolah yang dipilih
-        SELECT lokasi_gps INTO v_lokasi_gps
-        FROM tb_sekolah
-        WHERE id_sekolah = v_sekolah_id;
+--         -- 2. Ambil ID Sekolah Tujuan secara acak
+--         SELECT id_sekolah INTO v_sekolah_id
+--         FROM tb_sekolah
+--         ORDER BY RAND()
+--         LIMIT 1;
 
-        -- 4. Generate Tanggal acak (misal dalam 60 hari terakhir)
-        -- SET v_tanggal = DATE_SUB(CURDATE(), INTERVAL FLOOR(RAND() * 60) DAY);
-		SET v_tanggal = CURDATE();
+--         -- 3. Ambil lokasi_gps berdasarkan id_sekolah yang dipilih
+--         SELECT lokasi_gps INTO v_lokasi_gps
+--         FROM tb_sekolah
+--         WHERE id_sekolah = v_sekolah_id;
 
-        -- 5. Generate Jam acak
-        SET v_jam = SEC_TO_TIME(FLOOR(RAND() * 86400)); -- Angka acak antara 00:00:00 - 23:59:59
+--         -- 4. Generate Tanggal acak (misal dalam 60 hari terakhir)
+--         -- SET v_tanggal = DATE_SUB(CURDATE(), INTERVAL FLOOR(RAND() * 60) DAY);
+-- 		SET v_tanggal = CURDATE();
 
-        -- 6. Generate Jumlah acak (misal antara 50 - 300)
-        SET v_jumlah = FLOOR(RAND() * (300 - 50 + 1)) + 50;
+--         -- 5. Generate Jam acak
+--         SET v_jam = SEC_TO_TIME(FLOOR(RAND() * 86400)); -- Angka acak antara 00:00:00 - 23:59:59
 
-        -- 7. Generate nama file Foto dummy
-        SET v_foto = CONCAT('dummy_foto.jpg');
+--         -- 6. Generate Jumlah acak (misal antara 50 - 300)
+--         SET v_jumlah = FLOOR(RAND() * (300 - 50 + 1)) + 50;
 
-        -- 8. Insert data ke tb_distribusi
-        INSERT INTO tb_distribusi (
-            id_petugas_distribusi,
-            id_sekolah_tujuan,
-            tanggal,
-            jam,
-            nama_barang,
-            jumlah,
-            jumlah_habis,        -- Default 0
-            jumlah_kembali,      -- Default 0
-            lokasi_gps,          -- Diambil dari tb_sekolah
-            lokasi_terkini,      -- Default NULL
-            foto,                -- Nama file dummy
-            status_konfirmasi,   -- Default '0'
-            status_pengiriman,   -- Default '0'
-            status_evaluasi,     -- Default 0
-            jam_berangkat,       -- Default NULL
-            jam_tiba,            -- Default NULL
-            gps_awal             -- Default NULL
-        ) VALUES (
-            v_petugas_id,
-            v_sekolah_id,
-            v_tanggal,
-            v_jam,
-            'Makanan',           -- Default 'Makanan'
-            v_jumlah,
-            0,                   -- jumlah_habis
-            0,                   -- jumlah_kembali
-            v_lokasi_gps,
-            NULL,                -- lokasi_terkini
-            v_foto,
-            '0',                 -- status_konfirmasi (ENUM)
-            '0',                 -- status_pengiriman (ENUM)
-            0,                   -- status_evaluasi (INT)
-            NULL,                -- jam_berangkat
-            NULL,                -- jam_tiba
-            NULL                 -- gps_awal
-        );
+--         -- 7. Generate nama file Foto dummy
+--         SET v_foto = CONCAT('dummy_foto.jpg');
 
-        -- Naikkan counter
-        SET v_counter = v_counter + 1;
-    END WHILE;
+--         -- 8. Insert data ke tb_distribusi
+--         INSERT INTO tb_distribusi (
+--             id_petugas_distribusi,
+--             id_sekolah_tujuan,
+--             tanggal,
+--             jam,
+--             nama_barang,
+--             jumlah,
+--             jumlah_habis,        -- Default 0
+--             jumlah_kembali,      -- Default 0
+--             lokasi_gps,          -- Diambil dari tb_sekolah
+--             lokasi_terkini,      -- Default NULL
+--             foto,                -- Nama file dummy
+--             status_konfirmasi,   -- Default '0'
+--             status_pengiriman,   -- Default '0'
+--             status_evaluasi,     -- Default 0
+--             jam_berangkat,       -- Default NULL
+--             jam_tiba,            -- Default NULL
+--             gps_awal             -- Default NULL
+--         ) VALUES (
+--             v_petugas_id,
+--             v_sekolah_id,
+--             v_tanggal,
+--             v_jam,
+--             'Makanan',           -- Default 'Makanan'
+--             v_jumlah,
+--             0,                   -- jumlah_habis
+--             0,                   -- jumlah_kembali
+--             v_lokasi_gps,
+--             NULL,                -- lokasi_terkini
+--             v_foto,
+--             '0',                 -- status_konfirmasi (ENUM)
+--             '0',                 -- status_pengiriman (ENUM)
+--             0,                   -- status_evaluasi (INT)
+--             NULL,                -- jam_berangkat
+--             NULL,                -- jam_tiba
+--             NULL                 -- gps_awal
+--         );
 
-    -- Tampilkan pesan selesai (opsional)
-    SELECT CONCAT(num_rows, ' baris data dummy berhasil ditambahkan ke tb_distribusi.') AS Status;
+--         -- Naikkan counter
+--         SET v_counter = v_counter + 1;
+--     END WHILE;
 
-END$$
+--     -- Tampilkan pesan selesai (opsional)
+--     SELECT CONCAT(num_rows, ' baris data dummy berhasil ditambahkan ke tb_distribusi.') AS Status;
 
-DELIMITER ;
+-- END$$
+
+-- DELIMITER ;
 
 -- --------------------------------------------------------
 

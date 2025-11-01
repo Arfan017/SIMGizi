@@ -76,7 +76,6 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
 </head>
 
 <body>
-
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
         <div id="evalToastSuccess" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -132,6 +131,14 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
                         <a href="monitoring.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
                             <div data-i18n="Icons">Monitoring</div>
+                        </a>
+                    </li>
+
+                    <!-- Icons -->
+                    <li class="menu-item">
+                        <a href="monitoring_distribusi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
+                            <div data-i18n="Icons">Monitoring Distribusi</div>
                         </a>
                     </li>
 
@@ -448,7 +455,6 @@ $data_evaluasi = mysqli_query($conn, $q_evaluasi);
             e.preventDefault();
             var form = $(this);
 
-            // Validasi form
             var status = form.find('[name="status_distribusi"]').val();
             var catatan = form.find('[name="catatan"]').val();
 

@@ -5,15 +5,13 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') {
     header('Location: ../../../index.php');
     exit();
 }
-require '../../dompdf/vendor/autoload.php'; // include autoloader
-require '../config.php'; // koneksi database
+require '../../dompdf/vendor/autoload.php';
+require '../config.php';
 
 use Dompdf\Dompdf;
 
 $tanggal_mulai = $_GET['tanggal_mulai'] ?? '';
 $tanggal_akhir = $_GET['tanggal_akhir'] ?? '';
-// $sekolah       = $_GET['sekolah'] ?? '';
-
 $where = "WHERE status_konfirmasi = '1'";
 
 if (!empty($tanggal_mulai) && !empty($tanggal_akhir)) {
@@ -25,22 +23,17 @@ if (!empty($tanggal_mulai) && !empty($tanggal_akhir)) {
     $where .= " AND tanggal <= '" . date('Y-m-d', strtotime($tanggal_akhir)) . "'";
 }
 
-// if (!empty($sekolah)) {
-//     $where .= " AND tujuan = '" . $conn->real_escape_string($sekolah) . "'";
-// }
+
 
 $sql = "SELECT tb_distribusi.*, tb_users.nama 
           FROM tb_distribusi 
           JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users 
           $where ORDER BY tb_distribusi.tanggal ASC";
 
-// Ambil data distribusi
 $query = $conn->query($sql);
 $petugas = $conn->query("SELECT * FROM tb_users WHERE id_users=2")->fetch_assoc();
-// $nama_petugas = $petugas['nama'];
 
 
-// Buat HTML laporan
 $html = '
 <h2 style="text-align:center; margin-bottom:5px;">Laporan Konfirmasi Penerimaan Barang</h2>
 <br>
@@ -88,7 +81,6 @@ while ($row = $query->fetch_assoc()) {
 
 $html .= '</tbody></table>';
 
-// Tambahkan tanda tangan / footer laporan
 $html .= '
 <br><br>
 <table width="100%">
@@ -102,14 +94,10 @@ $html .= '
 </table>
 ';
 
-// Konversi ke PDF dengan Dompdf
 $dompdf = new Dompdf();
 $dompdf->loadHtml($html);
 
-// Setting ukuran & orientasi kertas
-$dompdf->setPaper('A4', 'portrait'); // bisa "portrait" juga
+$dompdf->setPaper('A4', 'portrait'); 
 
-// Render & output
 $dompdf->render();
 $dompdf->stream("laporan_distribusi.pdf", array("Attachment" => false));
-// Attachment=false supaya langsung tampil di browser

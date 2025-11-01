@@ -11,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $jumlah_kembali = $_POST['jumlah_kembali'];
     $catatan = $_POST['catatan'];
 
-    // --- Upload Foto ---
     $foto_nama = null;
     if (isset($_FILES['foto_konfirmasi']) && $_FILES['foto_konfirmasi']['error'] === 0) {
         $target_dir = "../../uploads/";

@@ -309,7 +309,6 @@ include '../../../php/config.php';
             chart.render();
 
             function fetchChartData(viewType) {
-                // Tampilkan state loading (opsional, bisa dihapus jika recreate cepat)
                 if (chart) {
                     chart.updateOptions({
                         noData: {
@@ -317,7 +316,7 @@ include '../../../php/config.php';
                         }
                     });
                 } else {
-                    $('#chartDistribusi').html('Memuat data...'); // Fallback jika chart belum ada
+                    $('#chartDistribusi').html('Memuat data...');
                 }
 
                 $.ajax({
@@ -330,34 +329,29 @@ include '../../../php/config.php';
                     success: function(response) {
                         console.log("Data JSON berhasil diparsing:", response);
 
-                        // --- VALIDASI DATA (Tetap penting) ---
                         if (!response || response.status !== 'success') {
                             var errorMsg = response ? (response.message || 'Status bukan success') : 'Respon tidak valid dari server.';
                             console.error("Error API:", errorMsg);
-                            if (chart) chart.destroy(); // Hancurkan chart lama
-                            $('#chartDistribusi').html('<p style="color:red;">' + errorMsg + '</p>'); // Tampilkan error di div
+                            if (chart) chart.destroy();
+                            $('#chartDistribusi').html('<p style="color:red;">' + errorMsg + '</p>');
                             return;
                         }
 
                         if (!response.labels || !Array.isArray(response.labels) ||
                             !response.series || !Array.isArray(response.series)) {
                             console.error("Format data salah:", response);
-                            if (chart) chart.destroy(); // Hancurkan chart lama
-                            $('#chartDistribusi').html('<p style="color:red;">Format data dari server salah.</p>'); // Tampilkan error di div
+                            if (chart) chart.destroy(); 
+                            $('#chartDistribusi').html('<p style="color:red;">Format data dari server salah.</p>'); 
                             return;
                         }
-                        // --- AKHIR VALIDASI ---
 
 
-                        // --- PENGHANCURAN DAN PEMBUATAN ULANG CHART ---
                         console.log("Mencoba membuat ulang chart...");
                         try {
-                            // 1. Hancurkan chart yang sudah ada (jika ada)
                             if (chart) {
                                 chart.destroy();
                             }
 
-                            // 2. Siapkan OPSI BARU dengan data yang baru diterima
                             var newOptions = {
                                 chart: {
                                     type: 'bar',
@@ -367,9 +361,9 @@ include '../../../php/config.php';
                                         show: true
                                     }
                                 },
-                                series: response.series, // <-- Masukkan data series baru
+                                series: response.series, 
                                 xaxis: {
-                                    categories: response.labels, // <-- Masukkan data label baru
+                                    categories: response.labels,
                                     labels: {
                                         rotate: -45
                                     }
@@ -400,15 +394,13 @@ include '../../../php/config.php';
                                 grid: {
                                     borderColor: '#e7e7e7'
                                 },
-                                noData: { // Teks jika data diterima tapi KOSONG
+                                noData: { 
                                     text: 'Tidak ada data untuk ditampilkan pada periode ini.'
                                 }
                             };
 
-                            // 3. Buat INSTANCE CHART BARU dengan opsi baru
                             chart = new ApexCharts(document.querySelector('#chartDistribusi'), newOptions);
 
-                            // 4. Render chart baru
                             chart.render();
                             console.log("Pembuatan ulang chart berhasil.");
 
@@ -416,19 +408,17 @@ include '../../../php/config.php';
                             console.error("Error saat membuat ulang chart:", e);
                             $('#chartDistribusi').html('<p style="color:red;">Error saat merender chart. Cek F12 Console.</p>');
                         }
-                        // --- AKHIR PENGHANCURAN DAN PEMBUATAN ULANG ---
 
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         console.error("AJAX Error:", textStatus, errorThrown);
                         console.error("Response Text:", jqXHR.responseText);
-                        if (chart) chart.destroy(); // Hancurkan chart lama
+                        if (chart) chart.destroy();
                         $('#chartDistribusi').html('<p style="color:red;">Gagal memuat data. Cek F12 Console.</p>'); // Tampilkan error di div
                     }
                 });
             }
 
-            // --- Listener Tombol (Tidak Berubah) ---
             $('#btnBulanan').on('click', function() {
                 $(this).addClass('active').siblings().removeClass('active');
                 fetchChartData('monthly');
@@ -439,7 +429,6 @@ include '../../../php/config.php';
                 fetchChartData('daily');
             });
 
-            // Muat data default
             fetchChartData('monthly');
         });
     </script>

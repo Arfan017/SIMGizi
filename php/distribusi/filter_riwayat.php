@@ -5,7 +5,6 @@ $raw_tanggal_mulai = $_POST['tanggal_mulai'] ?? '';
 $raw_tanggal_akhir = $_POST['tanggal_akhir'] ?? '';
 $raw_sekolah = $_POST['sekolah'] ?? '';
 
-// Validate dates (expecting YYYY-MM-DD) and school id
 $tanggal_mulai = null;
 $tanggal_akhir = null;
 $sekolah = null;
@@ -29,7 +28,6 @@ $where = "WHERE status_konfirmasi = '1'";
 $types = '';
 $params = [];
 
-// Build dynamic WHERE with parameters
 if ($tanggal_mulai && $tanggal_akhir) {
     $where .= " AND tanggal BETWEEN ? AND ?";
     $types .= 'ss';
@@ -56,13 +54,11 @@ JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah $wher
 $data = [];
 if ($stmt = mysqli_prepare($conn, $sql)) {
     if (!empty($params)) {
-        // bind params dynamically
         $bind_names = [];
         $bind_names[] = $types;
         for ($i = 0; $i < count($params); $i++) {
             $bind_names[] = $params[$i];
         }
-        // mysqli_stmt::bind_param requires references
         $refs = [];
         foreach ($bind_names as $key => $val) {
             $refs[$key] = &$bind_names[$key];
@@ -81,7 +77,6 @@ if ($stmt = mysqli_prepare($conn, $sql)) {
     }
     mysqli_stmt_close($stmt);
 } else {
-    // fallback: attempt direct query (shouldn't normally happen)
     $res = mysqli_query($conn, $sql);
     if ($res) {
         while ($row = mysqli_fetch_assoc($res)) {

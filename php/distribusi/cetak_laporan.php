@@ -5,8 +5,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
     header('Location: ../../../index.php');
     exit();
 }
-require '../../dompdf/vendor/autoload.php'; // include autoloader
-require '../config.php'; // koneksi database
+require '../../dompdf/vendor/autoload.php'; 
+require '../config.php';
 
 use Dompdf\Dompdf;
 
@@ -37,13 +37,11 @@ $sql = "SELECT tb_distribusi.*, tb_users.nama, tb_sekolah.nama_sekolah AS sekola
         $where 
         ORDER BY tanggal DESC";
 
-// Ambil data distribusi
 $query = $conn->query($sql);
 $petugas = $conn->query("SELECT * FROM tb_users WHERE id_users=3")->fetch_assoc();
 $nama_petugas = $petugas['nama'];
 
 
-// Buat HTML laporan
 $html = '
 <h2 style="text-align:center; margin-bottom:5px;">Laporan Distribusi Barang</h2>
 <br>
@@ -95,7 +93,6 @@ while ($row = $query->fetch_assoc()) {
 
 $html .= '</tbody></table>';
 
-// Tambahkan tanda tangan / footer laporan
 $html .= '
 <br><br>
 <table width="100%">
@@ -109,17 +106,13 @@ $html .= '
 </table>
 ';
 
-// Konversi ke PDF dengan Dompdf
 $dompdf = new Dompdf();
 $dompdf->loadHtml($html);
 
-// Setting ukuran & orientasi kertas
-$dompdf->setPaper('A4', 'portrait'); // bisa "portrait" juga
+$dompdf->setPaper('A4', 'portrait');
 
-// Render & output
 $dompdf->render();
 $dompdf->stream("laporan_distribusi.pdf", array("Attachment" => false));
-// Attachment=false supaya langsung tampil di browser
 
 function getNamaSekolah($conn, $id_sekolah) {
     $query = "SELECT nama_sekolah FROM tb_sekolah WHERE id_sekolah = '$id_sekolah'";

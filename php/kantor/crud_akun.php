@@ -1,7 +1,6 @@
 <?php
 include '../config.php';
 
-// CREATE
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     header('Content-Type: application/json');
 
@@ -13,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     $no_hp        = mysqli_real_escape_string($conn, $_POST['no_hp']);
     $status       = 'Aktif';
 
-    // Cek apakah username sudah ada
     $cek = mysqli_query($conn, "SELECT * FROM tb_users WHERE username='$username'");
     if (mysqli_num_rows($cek) > 0) {
         echo json_encode([
@@ -23,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
         exit;
     }
 
-    // Insert data
     $query = mysqli_query($conn, "INSERT INTO tb_users (username, password, role, nama, id_asal_sekolah, no_hp, status) 
                                                 VALUES ('$username', '$password', '$role', '$nama_lengkap', '$asal_sekolah', '$no_hp', '$status')");
     if ($query) {
@@ -40,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {
     exit;
 }
 
-// DELETE
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     header('Content-Type: application/json');
 
@@ -61,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
     exit;
 }
 
-// UPDATE
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
     header('Content-Type: application/json');
     $id_users = intval($_POST['id_users']);
@@ -73,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
     $status = mysqli_real_escape_string($conn, $_POST['status']);
     $password = $_POST['password'];
 
-    // Cek username unik (kecuali milik sendiri)
     $cek = mysqli_query($conn, "SELECT * FROM tb_users WHERE username='$username' AND id_users != $id_users");
     if (mysqli_num_rows($cek) > 0) {
         echo json_encode([

@@ -65,7 +65,7 @@ $result = mysqli_query($conn, $query);
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link">
+                    <a href="index.php" class="app-brand-link">
                         <i class="icon-menu icon-base ri ri-home-office-line icon-32px bg-info"></i>
                         <span class="app-brand-text demo menu-text fw-semibold ms-2">ADMIN KANTOR</span>
                     </a>
@@ -95,6 +95,14 @@ $result = mysqli_query($conn, $query);
                         <a href="monitoring.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
                             <div data-i18n="Icons">Monitoring</div>
+                        </a>
+                    </li>
+
+                    <!-- Icons -->
+                    <li class="menu-item">
+                        <a href="monitoring_distribusi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
+                            <div data-i18n="Icons">Monitoring Distribusi</div>
                         </a>
                     </li>
 
@@ -566,7 +574,7 @@ $result = mysqli_query($conn, $query);
 
         $(document).ready(function() {
             $("#formTambahAkun").on("submit", function(e) {
-                e.preventDefault(); // cegah reload
+                e.preventDefault(); 
 
                 $.ajax({
                     url: "../../../php/kantor/crud_akun.php",
@@ -580,7 +588,7 @@ $result = mysqli_query($conn, $query);
                             $("#formTambahAkun")[0].reset();
                             $("#ModalTambahAkun").modal("hide");
                             setTimeout(function() {
-                                location.reload(); // refresh tabel agar data baru muncul
+                                location.reload();
                             }, 1000);
                         } else if (response.status === "exists") {
                             alertClass = "alert-warning";
@@ -608,7 +616,7 @@ $result = mysqli_query($conn, $query);
         });
 
         $("#formHapusAkun").on("submit", function(e) {
-            e.preventDefault(); // cegah reload
+            e.preventDefault();
 
             $.ajax({
                 url: "../../../php/kantor/crud_akun.php",
@@ -622,7 +630,7 @@ $result = mysqli_query($conn, $query);
                         $("#formHapusAkun")[0].reset();
                         $("#ModalHapusAkun").modal("hide");
                         setTimeout(function() {
-                            location.reload(); // refresh tabel agar data baru muncul
+                            location.reload();
                         }, 1000);
                     } else if (response.status === "exists") {
                         alertClass = "alert-warning";
@@ -655,7 +663,6 @@ $result = mysqli_query($conn, $query);
             var username = $(this).data('username');
             var password = $(this).data('password');
 
-            // Isi data ke input modal
             $('#hapusIdUsers').val(id_users);
             $('#hapusNama').val(nama);
             $('#hapusPeran').val(peran);
@@ -708,7 +715,6 @@ $result = mysqli_query($conn, $query);
             var password = $(this).data('password');
             var no_hp = $(this).data('no_hp');
 
-            // Isi data ke input modal
             $('#editIdUsers').val(id_users);
             $('#editNama').val(nama);
             $('#editPeran').val(peran);
@@ -717,7 +723,6 @@ $result = mysqli_query($conn, $query);
         });
 
         $(document).ready(function() {
-            // Tampilkan/hide dropdown asal sekolah saat peran diubah
             $('#editPeran').on('change', function() {
                 if ($(this).val() === 'admin_sekolah') {
                     $('#rowEditAsalSekolah').show();
@@ -728,7 +733,6 @@ $result = mysqli_query($conn, $query);
                 }
             });
 
-            // Isi data ke modal edit akun
             $(document).on('click', '.btnEditAkun', function() {
                 var id_users = $(this).data('id_users');
                 var nama = $(this).data('nama');
@@ -744,10 +748,8 @@ $result = mysqli_query($conn, $query);
                 $('#editUsername').val(username);
                 $('#editNoHp').val(no_hp);
 
-                // Set asal sekolah jika ada
                 $('#editAsalSekolah').val(id_asal_sekolah);
 
-                // Tampilkan dropdown asal sekolah jika peran admin_sekolah
                 if (peran === 'admin_sekolah') {
                     $('#rowEditAsalSekolah').show();
                     $('#editAsalSekolah').prop('required', true);

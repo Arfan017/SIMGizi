@@ -287,21 +287,6 @@ $result = mysqli_query($conn, $query);
                                             <button type="submit" class="btn btn-warning w-100 btn-lg">Simpan Menu & Stok</button>
                                         </form>
                                     </div>
-                                    <!-- <div class="card-body">
-                                        <div class="card-body">
-                                            <form id="formStokHarian" action="../../../php/distribusi/crud_stok.php" method="POST">
-                                                <div class="mb-3">
-                                                    <label for="tanggal_stok" class="form-label">Tanggal</label>
-                                                    <input type="date" class="form-control" id="tanggal_stok" name="tanggal_stok" required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="jumlah_total" class="form-label">Jumlah Total Porsi</label>
-                                                    <input type="number" class="form-control" id="jumlah_total" name="jumlah_total" min="1" required placeholder="Contoh: 2000">
-                                                </div>
-                                                <button type="submit" class="btn btn-outline-warning w-100">Simpan Stok</button>
-                                            </form>
-                                        </div>
-                                    </div> -->
                                 </div>
                             </div>
                             <!-- / Form Input -->
@@ -348,10 +333,9 @@ $result = mysqli_query($conn, $query);
 
     <script>
         $(document).ready(function() {
-            // Fungsi untuk mengisi dropdown
             function populateDropdown(selector, items, placeholder) {
                 var dropdown = $(selector);
-                dropdown.empty(); // Kosongkan dulu
+                dropdown.empty();
                 if (placeholder) {
                     dropdown.append($('<option>', {
                         value: '',
@@ -370,13 +354,12 @@ $result = mysqli_query($conn, $query);
                         value: '',
                         text: 'Tidak ada pilihan'
                     }));
-                    if (selector !== '#menu_protein2' && selector !== '#menu_buah') { // Kecuali opsional
-                        dropdown.prop('required', false); // Nonaktifkan required jika tidak ada pilihan
+                    if (selector !== '#menu_protein2' && selector !== '#menu_buah') { 
+                        dropdown.prop('required', false);
                     }
                 }
             }
 
-            // Ambil data bahan makanan saat halaman dimuat
             $.getJSON('../../../php/distribusi/api_get_bahan_makanan.php', function(response) {
                 if (response.status === 'success' && response.options) {
                     populateDropdown('#menu_kh', response.options.KH, '- Pilih KH -');
@@ -386,26 +369,23 @@ $result = mysqli_query($conn, $query);
                     populateDropdown('#menu_buah', response.options.Buah, '- Pilih Buah (Opsional) -');
                 } else {
                     alert('Gagal memuat pilihan menu: ' + (response.message || 'Format data salah'));
-                    // Nonaktifkan form atau tampilkan pesan error
                 }
             }).fail(function() {
                 alert('Gagal menghubungi server untuk mengambil pilihan menu.');
-                // Nonaktifkan form atau tampilkan pesan error
             });
 
             // Handler untuk submit form
             $('#formMenuStokHarian').on('submit', function(e) {
                 e.preventDefault();
                 $.ajax({
-                    url: '../../../php/distribusi/api_save_menu_stok.php', // Panggil API baru
+                    url: '../../../php/distribusi/api_save_menu_stok.php',
                     type: 'POST',
-                    data: $(this).serialize(), // Kirim semua data form
+                    data: $(this).serialize(),
                     dataType: 'json',
                     success: function(response) {
                         if (response.status === 'success') {
                             alert(response.message || 'Menu dan Stok berhasil disimpan!');
                             $('#formMenuStokHarian')[0].reset();
-                            // Reset dropdowns ke placeholder awal
                             $('#menu_kh').val('');
                             $('#menu_protein1').val('');
                             $('#menu_protein2').val('');

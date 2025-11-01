@@ -101,7 +101,7 @@ $result_sekolah2 = mysqli_query($conn, $q_sekolah2);
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link">
+                    <a href="index.php" class="app-brand-link">
                         <i class="icon-menu icon-base ri ri-home-office-line icon-32px bg-info"></i>
                         <span class="app-brand-text demo menu-text fw-semibold ms-2">ADMIN KANTOR</span>
                     </a>
@@ -131,6 +131,14 @@ $result_sekolah2 = mysqli_query($conn, $q_sekolah2);
                         <a href="monitoring.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
                             <div data-i18n="Icons">Monitoring</div>
+                        </a>
+                    </li>
+
+                    <!-- Icons -->
+                    <li class="menu-item">
+                        <a href="monitoring_distribusi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
+                            <div data-i18n="Icons">Monitoring Distribusi</div>
                         </a>
                     </li>
 
@@ -496,7 +504,6 @@ $result_sekolah2 = mysqli_query($conn, $q_sekolah2);
             e.preventDefault();
             var form = $(this);
 
-            // Validasi form
             var status = form.find('[name="status_distribusi"]').val();
             var catatan = form.find('[name="catatan"]').val();
 
@@ -604,7 +611,6 @@ $result_sekolah2 = mysqli_query($conn, $q_sekolah2);
                         html = "<div class='text-muted'>Tidak ada laporan evaluasi.</div>";
                     }
 
-                    // Pastikan selector tepat pada wrapper data
                     $('#navs-justified-laporan-evaluasi .card-body .overflow-auto .p-0').html(html);
                 },
                 error: function() {
@@ -671,17 +677,14 @@ $result_sekolah2 = mysqli_query($conn, $q_sekolah2);
 
 
         function cetakLaporan() {
-            // Ambil filter yang sedang dipilih
             var sekolah = $('#filterSekolahRiwayat').val();
             var tglAwal = $('#filterTanggalAwalRiwayat').val();
             var tglAkhir = $('#filterTanggalAkhirRiwayat').val();
 
-            // Buat URL ke file cetak, kirim filter via GET
             var url = '../../../php/kantor/cetak_riwayat_evaluasi.php?sekolah=' + encodeURIComponent(sekolah) +
                 '&tanggal_awal=' + encodeURIComponent(tglAwal) +
                 '&tanggal_akhir=' + encodeURIComponent(tglAkhir);
 
-            // Buka halaman cetak di tab baru
             window.open(url, '_blank');
         }
     </script>

@@ -213,7 +213,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                     <div class="row g-3">
                                                         <?php while ($data = mysqli_fetch_assoc($result_riwayat_evaluasi)): ?>
                                                             <?php
-                                                            // Determine status text and badge without overwriting DB field
                                                             $status_text = '';
                                                             $badge = 'secondary';
                                                             if ($data['status_distribusi'] == 1) {
@@ -227,7 +226,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                                 $badge = 'danger';
                                                             }
 
-                                                            // Safe image handling: use basename to avoid path traversal and fallback if missing
                                                             $filename = isset($data['gambar']) ? basename($data['gambar']) : '';
                                                             $uploadDir = realpath(__DIR__ . '/../../../uploads');
                                                             $imgPath = '';
@@ -387,7 +385,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                 console.log('Tanggal Akhir:', tanggalAkhir);
                 console.log('Sekolah:', sekolah);
 
-                // AJAX request to filter data
                 $.ajax({
                     url: '../../../php/distribusi/filter_evaluasi.php',
                     type: 'POST',
@@ -401,7 +398,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         var html = '';
                         if (response && response.length > 0) {
                             $.each(response, function(i, row) {
-                                // Map status numeric to text and badge class
                                 var statusText = '';
                                 var badge = 'secondary';
                                 if (row.status_distribusi == 1) {
@@ -432,7 +428,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                             html = '<div class="col-12 text-center text-muted">Data tidak ditemukan</div>';
                         }
 
-                        // Inject into the existing grid wrapper; if not present create it
                         var $container = $('#riwayatContainer .row.g-3');
                         if ($container.length === 0) {
                             $('#riwayatContainer').html('<div class="row g-3">' + html + '</div>');

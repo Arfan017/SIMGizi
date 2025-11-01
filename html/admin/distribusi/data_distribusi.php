@@ -9,7 +9,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
 }
 include '../../../php/config.php';
 
-// Query to get account data
 $query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
             JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users 
             JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 

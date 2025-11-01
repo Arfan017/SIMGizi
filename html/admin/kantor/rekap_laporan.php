@@ -67,7 +67,7 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
             <!-- Menu -->
             <aside id="layout-menu" class="layout-menu menu-vertical menu">
                 <div class="app-brand demo">
-                    <a href="index.html" class="app-brand-link">
+                    <a href="index.php" class="app-brand-link">
                         <i class="icon-menu icon-base ri ri-home-office-line icon-32px bg-info"></i>
                         <span class="app-brand-text demo menu-text fw-semibold ms-2">ADMIN KANTOR</span>
                     </a>
@@ -97,6 +97,14 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                         <a href="monitoring.php" class="menu-link">
                             <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
                             <div data-i18n="Icons">Monitoring</div>
+                        </a>
+                    </li>
+
+                    <!-- Icons -->
+                    <li class="menu-item">
+                        <a href="monitoring_distribusi.php" class="menu-link">
+                            <i class="menu-icon icon-base ri ri-bar-chart-box-line"></i>
+                            <div data-i18n="Icons">Monitoring Distribusi</div>
                         </a>
                     </li>
 

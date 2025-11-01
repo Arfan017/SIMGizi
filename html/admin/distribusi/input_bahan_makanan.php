@@ -296,7 +296,6 @@ include '../../../php/config.php';
                                     '<td>' + (index + 1) + '</td>' +
                                     '<td>' + item.nama_bahan + '</td>' +
                                     '<td>' + item.kategori + '</td>' +
-                                    // '<td><button class="btn btn-sm btn-danger btn-hapus" data-id="' + item.id_bahan + '">Hapus</button></td>' + // Opsional
                                     '</tr>';
                                 tbody.append(row);
                             });
@@ -338,24 +337,6 @@ include '../../../php/config.php';
                     }
                 });
             });
-
-            // Opsional: Handler untuk tombol hapus (jika ditambahkan)
-            // $('#tabelBahanBody').on('click', '.btn-hapus', function() {
-            //     var idBahan = $(this).data('id');
-            //     if (confirm('Yakin ingin menghapus bahan ini?')) {
-            //         // Buat AJAX request DELETE ke api_crud_bahan.php (perlu ditambahkan logikanya di PHP)
-            //         $.ajax({
-            //             url: '../../../php/api/api_crud_bahan.php',
-            //             type: 'DELETE', // Atau POST dengan parameter _method=DELETE
-            //             data: { id_bahan: idBahan },
-            //             dataType: 'json',
-            //             success: function(response) { ... loadBahanMakanan(); ... },
-            //             error: function() { ... }
-            //         });
-            //     }
-            // });
-
-            // Muat data bahan saat halaman pertama kali dibuka
             loadBahanMakanan();
         });
     </script>

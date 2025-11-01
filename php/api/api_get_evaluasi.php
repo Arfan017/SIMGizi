@@ -32,7 +32,6 @@ try {
 
     $stmt->execute();
 
-    // Pola kompatibel tanpa get_result()
     $stmt->store_result();
 
     // Sesuaikan bind_result dengan kolom yang di SELECT (tambahkan $gambar)

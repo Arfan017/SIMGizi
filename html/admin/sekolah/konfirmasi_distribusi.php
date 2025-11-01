@@ -415,16 +415,14 @@ $result = mysqli_query($conn, $query);
     <script>
         $(document).on('submit', '.formKonfirmasi', function(e) {
             e.preventDefault();
-            var form = $(this)[0]; // Ambil DOM element asli
+            var form = $(this)[0];
 
-            // Ambil nilai untuk validasi
             var status = $(this).find('[name="status"]').val();
             var jumlah_diterima = parseInt($(this).find('[name="jumlah_diterima"]').val()) || 0;
             var jumlah_habis = parseInt($(this).find('[name="jumlah_habis"]').val()) || 0;
             var jumlah_kembali = parseInt($(this).find('[name="jumlah_kembali"]').val()) || 0;
             var foto = $(this).find('[name="foto_konfirmasi"]')[0].files[0];
 
-            // Validasi foto
             if (!foto) {
                 $('#konfirmasiErrorMsg').text('Foto konfirmasi wajib diupload!');
                 const toast = new bootstrap.Toast(document.getElementById('konfirmasiToastError'));
@@ -432,7 +430,6 @@ $result = mysqli_query($conn, $query);
                 return;
             }
 
-            // Validasi status
             if (!status || status === "") {
                 $('#konfirmasiErrorMsg').text('Status penerimaan wajib dipilih!');
                 const toast = new bootstrap.Toast(document.getElementById('konfirmasiToastError'));
@@ -440,7 +437,6 @@ $result = mysqli_query($conn, $query);
                 return;
             }
 
-            // Validasi jumlah diterima
             if (jumlah_diterima <= 0) {
                 $('#konfirmasiErrorMsg').text('Jumlah diterima wajib diisi dan lebih dari 0!');
                 const toast = new bootstrap.Toast(document.getElementById('konfirmasiToastError'));
@@ -448,7 +444,6 @@ $result = mysqli_query($conn, $query);
                 return;
             }
 
-            // Validasi jumlah habis + kembali
             if (jumlah_habis + jumlah_kembali !== jumlah_diterima) {
                 $('#konfirmasiErrorMsg').text('Jumlah Habis (' + jumlah_habis + ') + Jumlah Kembali (' + jumlah_kembali + ') harus sama dengan Jumlah Diterima (' + jumlah_diterima + ')!');
                 const toast = new bootstrap.Toast(document.getElementById('konfirmasiToastError'));
@@ -456,22 +451,19 @@ $result = mysqli_query($conn, $query);
                 return;
             }
 
-            // Gunakan FormData untuk mengirim file
             var formData = new FormData(form);
 
-            // Disable button submit
             var submitBtn = $(this).find('button[type="submit"]');
             var originalText = submitBtn.html();
             submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Memproses...');
 
-            // Submit via AJAX dengan FormData
             $.ajax({
                 url: $(form).attr('action'),
                 type: 'POST',
                 data: formData,
                 dataType: 'json',
-                processData: false, // Jangan proses data
-                contentType: false, // Jangan set content type
+                processData: false, 
+                contentType: false, 
                 success: function(response) {
                     submitBtn.prop('disabled', false).html(originalText);
 
@@ -504,7 +496,6 @@ $result = mysqli_query($conn, $query);
             preview.html("");
 
             if (input.files && input.files[0]) {
-                // Validasi ukuran file (max 5MB)
                 if (input.files[0].size > 5 * 1024 * 1024) {
                     alert('Ukuran file terlalu besar! Maksimal 5MB');
                     input.value = '';

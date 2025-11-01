@@ -218,9 +218,8 @@ include '../../../php/config.php';
 
     <script>
         $(document).ready(function() {
-            var chart; // Variabel global untuk chart
+            var chart;
 
-            // Opsi dasar untuk Bar Chart (horizontal)
             var options = {
                 chart: {
                     type: 'bar',
@@ -237,7 +236,7 @@ include '../../../php/config.php';
                         }
                     }
                 },
-                colors: ['#28a745'], // Warna hijau
+                colors: ['#28a745'],
                 dataLabels: {
                     enabled: true,
                     offsetX: -6,
@@ -263,7 +262,7 @@ include '../../../php/config.php';
                 },
                 legend: {
                     show: false
-                }, // Sembunyikan legend untuk 1 series
+                },
                 tooltip: {
                     y: {
                         formatter: function(val) {
@@ -276,15 +275,10 @@ include '../../../php/config.php';
                 }
             };
 
-            // Inisialisasi chart
             var chartEl = document.querySelector('#chartMenuFrequency');
             chart = new ApexCharts(chartEl, options);
             chart.render();
 
-            /**
-             * Fungsi untuk memuat data chart berdasarkan tipe view.
-             * @param {string} viewType - 'monthly' atau 'daily'
-             */
             function loadChartData(viewType) {
                 chart.updateOptions({
                     noData: {
@@ -293,11 +287,11 @@ include '../../../php/config.php';
                 });
 
                 $.ajax({
-                    url: '../../../php/sekolah/api_get_menu_frequency.php', // Tetap panggil API yang sama
+                    url: '../../../php/sekolah/api_get_menu_frequency.php', 
                     type: 'GET',
                     data: {
                         view: viewType
-                    }, // Kirim 'view' BUKAN 'start_date'/'end_date'
+                    }, 
                     dataType: 'json',
                     success: function(response) {
                         console.log("Data JSON diterima:", response);
@@ -319,16 +313,15 @@ include '../../../php/config.php';
 
                         console.log("Mencoba update chart...");
                         try {
-                            // Update chart
                             chart.updateOptions({
                                 series: response.data.series,
-                                xaxis: { // Untuk horizontal bar, label ada di Y-axis
-                                    categories: [], // Kosongkan X categories (angka)
+                                xaxis: { 
+                                    categories: [], 
                                     title: {
                                         text: 'Jumlah Penyajian'
                                     }
                                 },
-                                yaxis: { // Masukkan label item menu di Y-axis
+                                yaxis: { 
                                     categories: response.data.labels,
                                     title: {
                                         text: 'Item Menu'
@@ -374,18 +367,16 @@ include '../../../php/config.php';
                 });
             }
 
-            // Listener untuk tombol filter
             $('#btnBulanan').on('click', function() {
                 $(this).addClass('active').siblings().removeClass('active');
-                loadChartData('monthly'); // Kirim 'monthly'
+                loadChartData('monthly'); 
             });
 
             $('#btnHarian').on('click', function() {
                 $(this).addClass('active').siblings().removeClass('active');
-                loadChartData('daily'); // Kirim 'daily'
+                loadChartData('daily'); 
             });
 
-            // Muat data default (bulanan) saat halaman pertama kali dibuka
             loadChartData('monthly');
         });
     </script>

@@ -10,10 +10,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
 
 include '../../../php/config.php';
 
-// Query to get account data
-// $query = "SELECT tb_distribusi.* , tb_users.nama, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
-//             JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah 
-//             JOIN tb_users ON tb_distribusi.id_petugas_distribusi = tb_users.id_users ORDER BY tanggal DESC";
 $query = "SELECT 
             d.id_distribusi, d.tanggal, d.jam, d.jumlah, d.lokasi_gps,
             d.status_konfirmasi, d.status_pengiriman,
@@ -34,22 +30,10 @@ $query = "SELECT
           LEFT JOIN tb_bahan_makanan p2 ON mh.id_bahan_protein2 = p2.id_bahan
           LEFT JOIN tb_bahan_makanan syr ON mh.id_bahan_sayur = syr.id_bahan
           LEFT JOIN tb_bahan_makanan bh ON mh.id_bahan_buah = bh.id_bahan
-          WHERE d.tanggal = CURDATE() -- Filter hanya tanggal hari ini
+          WHERE d.tanggal = CURDATE()
           ORDER BY d.id_distribusi DESC";
 
 $result = mysqli_query($conn, $query);
-
-// // Jumlah seluruh data distribusi
-// $q_total = mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_distribusi");
-// $total_distribusi = mysqli_fetch_assoc($q_total)['total'];
-
-// // Jumlah terkonfirmasi (status = 1)
-// $q_terkonfirmasi = mysqli_query($conn, "SELECT COUNT(*) AS terkonfirmasi FROM tb_distribusi WHERE status_konfirmasi = '1'");
-// $terkonfirmasi = mysqli_fetch_assoc($q_terkonfirmasi)['terkonfirmasi'];
-
-// // Jumlah belum terkonfirmasi (status = 0)
-// $q_belum = mysqli_query($conn, "SELECT COUNT(*) AS belum FROM tb_distribusi WHERE status_konfirmasi = '0'");
-// $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
 
 
 // Jumlah seluruh data distribusi HARI INI
@@ -403,24 +387,7 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                                                         <small class="text-muted">Petugas: <span id="detailIdDistribusi"></span></small>
                                                     </div>
                                                 </div>
-                                                <!-- <div class="modal-body">
-                                                    <div class="mb-2">
-                                                        <span class="me-2"><b>Dikirim:</b> <span id="detailJumlah"></span></span>
-                                                        <span class="me-2"><b>Tgl:</b> <span id="detailTanggal"></span></span>
-                                                        <span>
-                                                            <br>
-                                                            <b>Lokasi:</b>
-                                                            <a href="#" class="text-primary text-decoration-underline"><i class="ri-map-pin-2-fill">
-                                                                    <span id="detailLokasi"></span>
-                                                                </i></a>
-                                                            <button type="button" class="btn btn-outline-info btn-sm ms-2" data-bs-toggle="modal"
-                                                                data-bs-target="#modalMap">
-                                                                Preview Map
-                                                            </button>
-                                                        </span>
-                                                    </div>
 
-                                                </div> -->
                                                 <div class="modal-body">
                                                     <div class="mb-3">
                                                         <span class="me-2"><b>Dikirim:</b> <span id="detailJumlah"></span> Porsi</span>
@@ -540,41 +507,10 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
         <script src="../../../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
         <script src="../../../assets/vendor/js/menu.js"></script>
 
-        <!-- <script>
-            $(document).on("click", ".btnDetail", function() {
-                let id_distribusi = $(this).data("id_distribusi");
-                let tanggal = $(this).data("tanggal");
-                let jumlah = $(this).data("jumlah");
-                let lokasi = $(this).data("lokasi_gps");
-                let tujuan = $(this).data("tujuan");
-                const mapFrame = document.getElementById("mapFrame");
-
-                // Isi modal
-                $("#detailIdDistribusi").text(id_distribusi);
-                $("#detailTanggal").text(tanggal);
-                $("#detailJumlah").text(jumlah);
-                $("#detailTujuan").text(tujuan);
-                $("#detailLokasi").text(lokasi);
-
-                if (lokasi) {
-                    mapFrame.src = `https://maps.google.com/maps?q=${lokasi}&z=15&output=embed`;
-                } else {
-                    $("#detailLokasiLink").text("Tidak ada lokasi");
-                }
-            });
-
-            function previewLokasi(gps) {
-                const mapFrame = document.getElementById("mapFrame");
-                if (gps) {
-
-                }
-            }
-        </script> -->
-
         <script>
             $(document).on("click", ".btnDetail", function() {
                 // Ambil semua data dari tombol
-                let petugas = $(this).data("petugas"); // Ganti dari id_distribusi ke petugas
+                let petugas = $(this).data("petugas");
                 let tanggal = $(this).data("tanggal");
                 let jumlah = $(this).data("jumlah");
                 let lokasi = $(this).data("lokasi_gps");
@@ -592,14 +528,14 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
 
                 // Isi modal header
                 $("#detailTujuan").text(tujuan);
-                $("#detailIdDistribusi").text(petugas); // Ganti ID jadi nama petugas
+                $("#detailIdDistribusi").text(petugas); 
 
                 // Isi modal body - Info Pengiriman
                 $("#detailJumlah").text(jumlah);
                 $("#detailTanggal").text(tanggal);
 
                 // Isi modal body - Info Menu
-                $("#detailMenuKh").text(menu_kh || '-'); // Tampilkan '-' jika kosong
+                $("#detailMenuKh").text(menu_kh || '-');
                 $("#detailMenuP1").text(menu_p1 || '-');
                 $("#detailMenuP2").text(menu_p2 || '-');
                 $("#detailMenuSayur").text(menu_sayur || '-');
@@ -623,8 +559,6 @@ $belum_terkonfirmasi = mysqli_fetch_assoc($q_belum)['belum'];
                     mapFrame.src = ""; // Kosongkan iframe
                 }
             });
-
-            // Fungsi previewLokasi() sepertinya tidak terpakai, bisa dihapus.
         </script>
 
         <!-- endbuild -->

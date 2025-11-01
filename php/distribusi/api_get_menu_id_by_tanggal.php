@@ -1,12 +1,10 @@
 <?php
 ob_clean();
-// Gunakan nama sesi yang sama dengan halaman input_distribusi.php
 session_name('SIMGiziDistribusi');
 session_start();
 include '../config.php';
 header('Content-Type: application/json');
 
-// Validasi Sesi
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
     echo json_encode(['status' => 'error', 'message' => 'Akses ditolak.']);
     exit;
@@ -18,7 +16,6 @@ if (empty($tanggal)) {
     exit;
 }
 
-// Cari id_menu berdasarkan tanggal
 $stmt = $conn->prepare("SELECT id_menu FROM tb_menu_harian WHERE tanggal = ?");
 $stmt->bind_param("s", $tanggal);
 $stmt->execute();
@@ -27,10 +24,8 @@ $stmt->store_result();
 if ($stmt->num_rows > 0) {
     $stmt->bind_result($id_menu);
     $stmt->fetch();
-    // Jika ditemukan, kirim ID-nya
     echo json_encode(['status' => 'success', 'id_menu' => $id_menu]);
 } else {
-    // Jika tidak ditemukan, kirim pesan error
     echo json_encode(['status' => 'error', 'message' => 'Menu harian untuk tanggal ini belum diinput.']);
 }
 $stmt->close();

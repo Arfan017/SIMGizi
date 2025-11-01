@@ -1,11 +1,9 @@
 <?php
-// 1. Bersihkan output & mulai sesi
 ob_clean();
-session_name('SIMGiziSekolah'); // Pastikan nama sesi benar
+session_name('SIMGiziSekolah'); 
 session_start();
 include '../config.php';
 
-// 2. Fungsi respons & validasi
 function send_json_response($status, $dataOrMessage)
 {
     header('Content-Type: application/json');
@@ -19,14 +17,11 @@ function send_json_response($status, $dataOrMessage)
 }
 
 try {
-    // Validasi login
     if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') { // Sesuaikan dengan nama role Anda
         throw new Exception('Akses ditolak.');
     }
-    // Ambil id_sekolah dari Sesi
     $id_sekolah = $_SESSION['id_asal_sekolah'];
 
-    // Tentukan Rentang Tanggal
     $view_type = $_GET['view'] ?? 'monthly';
     if ($view_type === 'daily') {
         $start_date = date('Y-m-d', strtotime('monday this week'));
@@ -36,9 +31,6 @@ try {
         $end_date = date('Y-m-t');
     }
 
-    // --- 3. QUERY SQL DIPERBARUI ---
-    // Sekarang kita JOIN tb_menu_harian (mh) dengan tb_distribusi (d)
-    // dan memfilter berdasarkan id_sekolah_tujuan dan status_konfirmasi
     $sql = "
         SELECT bm.nama_bahan, bm.kategori, COUNT(bm.id_bahan) AS frekuensi
         FROM (
@@ -95,14 +87,10 @@ try {
         ORDER BY frekuensi DESC, bm.nama_bahan ASC
         LIMIT 20
     ";
-    // --- AKHIR PERUBAHAN QUERY ---
 
     $stmt = $conn->prepare($sql);
     if ($stmt === false) throw new Exception("Prepare failed: " . $conn->error);
 
-    // --- 4. BIND PARAMETER DIPERBARUI ---
-    // Sekarang ada 15 parameter: 5 x (tanggal, tanggal, id_sekolah)
-    // Tipe data: (string, string, integer) x 5 = 'ssi' x 5
     $stmt->bind_param(
         "ssississississi",
         $start_date,
@@ -121,7 +109,6 @@ try {
         $end_date,
         $id_sekolah
     );
-    // --- AKHIR PERUBAHAN BIND --- 
 
     $stmt->execute();
     $stmt->store_result();

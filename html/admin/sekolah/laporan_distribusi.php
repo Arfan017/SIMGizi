@@ -458,7 +458,6 @@ $result = mysqli_query($conn, $query);
     <script src="../../../assets/vendor/js/menu.js"></script>
 
     <script>
-        // Variabel global untuk menyimpan ID Distribusi yang sedang dilihat
         var currentDetailId = null;
 
         $(document).ready(function() {
@@ -504,12 +503,9 @@ $result = mysqli_query($conn, $query);
         });
 
 
-        // --- Handler BARU untuk klik tombol Detail ---
         $(document).on("click", ".btnDetail", function() {
-            // 1. Simpan ID Distribusi
             currentDetailId = $(this).data("id_distribusi");
 
-            // 2. Ambil semua data dari tombol
             let petugas = $(this).data("petugas");
             let tanggal = $(this).data("tanggal");
             let jam_tiba = $(this).data("jam_tiba");
@@ -519,7 +515,6 @@ $result = mysqli_query($conn, $query);
             let status_pengiriman = $(this).data("status_pengiriman").toString();
             let status_konfirmasi = $(this).data("status_konfirmasi").toString();
 
-            // Ambil data menu
             let menu_kh = $(this).data("menu_kh");
             let menu_p1 = $(this).data("menu_p1");
             let menu_p2 = $(this).data("menu_p2");
@@ -527,14 +522,12 @@ $result = mysqli_query($conn, $query);
             let menu_buah = $(this).data("menu_buah");
             let menu_tambahan = $(this).data("menu_tambahan");
 
-            // 3. Isi Modal - Data Umum
             $("#detailTujuan").text(tujuan || '-');
             $("#detailPetugas").text(petugas || '-');
             $("#detailTanggal").text(tanggal || '-');
             $("#detailJamTiba").text(jam_tiba || '-');
             $("#detailJumlah").text(jumlah || '0');
 
-            // 4. Isi Modal - Status (dengan terjemahan)
             let statusKirimSpan = $("#detailStatusPengiriman");
             if (status_pengiriman === '2') {
                 statusKirimSpan.text('Diterima').removeClass('bg-warning').addClass('bg-success');
@@ -551,7 +544,6 @@ $result = mysqli_query($conn, $query);
                 statusKonfirmSpan.text('Belum Dikonfirmasi').removeClass('bg-success').addClass('bg-warning');
             }
 
-            // 5. Isi Modal - Rincian Menu
             $("#detailMenuKh").text(menu_kh || '-');
             $("#detailMenuP1").text(menu_p1 || '-');
             $("#detailMenuP2").text(menu_p2 || '-');
@@ -570,7 +562,6 @@ $result = mysqli_query($conn, $query);
             // }
         });
 
-        // --- Handler BARU untuk tombol Cetak Detail di dalam Modal ---
         $('#btnCetakDetail').on('click', function() {
             if (currentDetailId) {
                 // Buat URL ke skrip cetak detail baru (yang perlu Anda buat)
@@ -581,11 +572,9 @@ $result = mysqli_query($conn, $query);
             }
         });
 
-        // --- Fungsi Cetak Laporan (Ringkasan) ---
         function cetakLaporan() {
             var tanggalMulai = $('#filterTanggalMulai').val();
             var tanggalAkhir = $('#filterTanggalAkhir').val();
-            // let sekolah = $('#filterSekolah').val();
 
             let url = "../../../php/sekolah/cetak_laporan.php?tanggal_mulai=" + tanggalMulai + "&tanggal_akhir=" + tanggalAkhir;
             window.open(url, "_blank");

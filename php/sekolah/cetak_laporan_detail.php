@@ -1,23 +1,18 @@
 <?php
-// 1. Bersihkan output buffer
 ob_clean();
-
-// 2. Load Dompdf
 require '../../dompdf/vendor/autoload.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-// 3. Validasi Sesi
 session_name('SIMGiziSekolah');
 session_start();
 include '../config.php';
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') { // Sesuaikan nama role
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_sekolah') {
     die("Error: Akses ditolak. Silakan login kembali.");
 }
 
-// 4. Ambil Data
 $id_distribusi = $_GET['id_distribusi'] ?? 0;
 $id_sekolah_session = $_SESSION['id_asal_sekolah'];
 
@@ -25,11 +20,10 @@ if (!ctype_digit((string)$id_distribusi) || $id_distribusi <= 0) {
     die("Error: ID Distribusi tidak valid.");
 }
 
-// 5. Query (DIUBAH: Tambah jumlah_habis, jumlah_kembali)
 $sql = "SELECT 
             d.id_distribusi, d.tanggal, d.jam, d.jumlah, d.lokasi_gps,
             d.status_konfirmasi, d.status_pengiriman, d.jam_tiba,
-            d.jumlah_habis, d.jumlah_kembali, -- <== PERUBAHAN DI SINI
+            d.jumlah_habis, d.jumlah_kembali, 
             u.nama AS nama_petugas, 
             s.nama_sekolah AS sekolah_tujuan,
             kh.nama_bahan AS menu_kh,
@@ -59,7 +53,6 @@ $stmt->execute();
 $stmt->store_result();
 
 if ($stmt->num_rows === 1) {
-    // 6. Bind Result (DIUBAH: Tambah $jumlah_habis, $jumlah_kembali)
     $stmt->bind_result(
         $id_distribusi_db,
         $tanggal,
@@ -87,7 +80,6 @@ if ($stmt->num_rows === 1) {
 $stmt->close();
 $conn->close();
 
-// 7. Fungsi Helper (tetap sama)
 function translateStatusPengiriman($status)
 {
     if ($status == '2') return ['text' => 'Diterima', 'class' => 'text-success'];
@@ -101,7 +93,6 @@ function translateStatusKonfirmasi($status)
 }
 $waktu_penerimaan = $jam_tiba ?? $jam_distribusi;
 
-// 8. Mulai Output Buffering
 ob_start();
 ?>
 
@@ -112,7 +103,6 @@ ob_start();
     <meta charset="utf-8" />
     <title>Laporan Distribusi #<?php echo htmlspecialchars($id_distribusi_db); ?></title>
     <style>
-        /* ... (CSS Anda dari sebelumnya, tidak perlu diubah) ... */
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 12px;
@@ -326,10 +316,8 @@ ob_start();
 
 </html>
 <?php
-// 9. Ambil HTML yang sudah di-buffer
 $html = ob_get_clean();
 
-// 10. Konfigurasi dan Generate PDF (Tidak Berubah)
 $options = new Options();
 $options->set('isHtml5ParserEnabled', true);
 $options->set('isRemoteEnabled', true);
@@ -339,7 +327,6 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
-// 11. Kirim PDF ke Browser (Tidak Berubah)
 $file_name = "Laporan-Distribusi-#" . $id_distribusi_db . ".pdf";
 $dompdf->stream($file_name, ["Attachment" => true]);
 exit;

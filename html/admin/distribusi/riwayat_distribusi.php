@@ -8,7 +8,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin_distribusi') {
 }
 include '../../../php/config.php';
 
-// Query to get account data
 $query = "SELECT tb_distribusi.*, tb_sekolah.nama_sekolah AS sekolah_tujuan FROM tb_distribusi 
             JOIN tb_sekolah ON tb_distribusi.id_sekolah_tujuan = tb_sekolah.id_sekolah
             WHERE status_konfirmasi = '1'";
@@ -222,7 +221,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                                                     <?php
                                                     if (mysqli_num_rows($result) > 0) {
                                                         while ($row = mysqli_fetch_assoc($result)) {
-                                                            // $status_badge = $row['status'] == '1' ? 'bg-label-success' : 'bg-label-danger';
                                                     ?>
 
                                                             <tr>
@@ -351,7 +349,6 @@ $result_sekolah = mysqli_query($conn, $q_sekolah);
                 var tanggalAkhir = $('#filterTanggalAkhir').val();
                 var sekolah = $('#filterSekolah').val();
 
-                // AJAX request to filter data
                 $.ajax({
                     url: '../../../php/distribusi/filter_riwayat.php',
                     type: 'POST',
